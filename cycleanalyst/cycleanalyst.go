@@ -2,60 +2,58 @@
 
 package cycleanalyst
 
-import "context"
-import "fmt"
-import "go.bug.st/serial"
-import "github.com/ihowson/eMotoDashboard/m/v2/model"
+import (
+	"bufio"
+	"context"
+	"fmt"
+
+	"go.bug.st/serial"
+
+	"github.com/ihowson/eMotoDashboard/m/v2/model"
+)
 
 type CycleAnalyst3Serial struct {
 	DevicePath string
 	Model      *model.Model
-
-	cancelContext context.Context
-	port          *serial.Port
 }
 
-func (ca *CycleAnalyst3Serial) Run() (context.CancelFunc, error) {
+func (ca *CycleAnalyst3Serial) Run() context.CancelFunc {
+	ctx, cancel := context.WithCancel(context.Background())
+
+	go func() {
+		for {
+			err := ca.loop(ctx, ca.Model)
+			fmt.Printf("Run: %v\n", err)
+		}
+	}()
+
+	return cancel
+}
+
+func (ca *CycleAnalyst3Serial) loop(ctx context.Context, model *model.Model) error {
 	mode := &serial.Mode{
 		BaudRate: 9600,
 		Parity:   serial.NoParity,
-		DataBits: 1,
+		DataBits: 8,
 		StopBits: serial.OneStopBit,
 	}
 	port, err := serial.Open(ca.DevicePath, mode)
 	if err != nil {
-		return nil, fmt.Errorf("Open: %w", err)
+		return fmt.Errorf("Open(%s): %w", ca.DevicePath, err)
+	}
+	defer port.Close()
+	// TODO: watch the cancelContext
+
+	scanner := bufio.NewScanner(port)
+	for scanner.Scan() {
+		dr := parseLine(scanner.Text())
+		publish(dr, ca.Model)
+	}
+	err = scanner.Err()
+	if err != nil {
+		// FIXME: if this fails, how do we alert the rest of the system? perhaps retry forever and fire an alarm saying 'CA not reporting data'.
+		return fmt.Errorf("reading standard input:", err)
 	}
 
-	ca.port = &port
-
-	go ca.loop()
-
-	ctx, cancel := context.WithCancel(context.Background())
-	ca.cancelContext = ctx
-	return cancel, nil
-}
-
-func (ca *CycleAnalyst3Serial) loop() {
-	// defer soething() // if we error, we sohuld quit?
-	// watch the cancelContext
-
-	// https://github.com/bugst/go-serial
-
-	/*
-		buff := make([]byte, 100)
-		for {
-			n, err := port.Read(buff)
-			if err != nil {
-				log.Fatal(err)
-				break
-			}
-			if n == 0 {
-				fmt.Println("\nEOF")
-				break
-			}
-			fmt.Printf("%v", string(buff[:n]))
-		}
-	*/
-
+	return nil
 }

@@ -18,8 +18,8 @@ type MotoGUI struct {
 
 	fontDINEng32    imgui.Font
 	fontDINMittel32 imgui.Font
-	fontAwesome32   imgui.Font
-	fontSpeed       imgui.Font
+	// fontAwesome32   imgui.Font
+	fontSpeed imgui.Font
 
 	clearColor [3]float32
 
@@ -128,6 +128,16 @@ func (gui *MotoGUI) drawFrame(p Platform, r Renderer, m *model.Model) {
 	// }
 
 	imgui.PushFont(gui.fontDINEng32)
+
+	imgui.PushFont(gui.fontDINMittel32)
+
+	// fontSize := GetFontSize
+	// 	float font_size = ImGui::GetFontSize() * text.size() / 2;
+	// 	ImGui::SameLine(
+	// 	ImGui::GetWindowSize().x / 2 -
+	// 	font_size + (font_size / 2)
+	// 	);
+
 	now := time.Now()
 	imgui.Text(fmt.Sprintf("%02d:%02d", now.Hour(), now.Minute()))
 	imgui.PopFont()
@@ -149,7 +159,7 @@ func (gui *MotoGUI) drawFrame(p Platform, r Renderer, m *model.Model) {
 		Y: (gui.height - speedoHeight) - (speedoHeight / 2),
 	})
 	imgui.PushStyleColor(col, color)
-	imgui.PushFont(gui.fontSpeed) // TODO: speedo font
+	imgui.PushFont(gui.fontSpeed)
 
 	// speed := m.LockNLoadFloat64(&m.Speed)
 	// imgui.Text(fmt.Sprintf("%2d", rand.Intn(71)))
@@ -187,6 +197,7 @@ func (gui *MotoGUI) drawFrame(p Platform, r Renderer, m *model.Model) {
 		X: 25.0,
 		Y: 25.0,
 	})
+
 	imgui.ProgressBarV(
 		float32(m.BatteryStateOfCharge),
 		imgui.Vec2{
@@ -210,10 +221,10 @@ func (gui *MotoGUI) drawFrame(p Platform, r Renderer, m *model.Model) {
 	// }
 
 	// imgui.Text(fmt.Sprintf("\uf175 %c %c %c", '', '', '\uf175')) // #           ")
-	// // speedo, wifi, temperature-half, bicycle, bolt, charging-station,
-	// // microchip (for controller temp?), plug, plug-circle-bolt,
-	// // plug-circle-exclamation, sliders, toggle-off, toggle-on, triangle-exclamation, motorcycle
-	// imgui.PopFont()
+	// speedo, wifi, temperature-half, bicycle, bolt, charging-station,
+	// microchip (for controller temp?), plug, plug-circle-bolt,
+	// plug-circle-exclamation, sliders, toggle-off, toggle-on, triangle-exclamation, motorcycle
+	imgui.PopFont()
 
 	imgui.End()
 

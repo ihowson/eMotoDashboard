@@ -3,15 +3,21 @@ package gui
 import imgui "github.com/inkyblackness/imgui-go/v4"
 
 func (gui *MotoGUI) loadFonts(io imgui.IO) {
-	// io.Fonts().AddFontDefault()
+	io.Fonts().AddFontDefault()
 	gui.fontDINEng32 = io.Fonts().AddFontFromFileTTF("assets/DINEngschriftStd.otf", 32)
 	gui.fontDINMittel32 = io.Fonts().AddFontFromFileTTF("assets/DINMittelschriftStd.otf", 32)
 
 	// mph font
-	config := imgui.NewFontConfig()
-	config.SetGlyphMinAdvanceX(24.0)
-	config.SetGlyphMaxAdvanceX(24.0)
-	gui.fontSpeed = io.Fonts().AddFontFromFileTTF("assets/DINMittelschriftStd.otf", 240)
+	// config := imgui.NewFontConfig()
+	// config.SetGlyphMinAdvanceX(24.0)
+	// config.SetGlyphMaxAdvanceX(24.0)
+	// gui.fontSpeed = io.Fonts().AddFontFromFileTTF("assets/DINMittelschriftStd.otf", 240)
+
+	// FIXME: I want 240 pixels here, but we get blocky text, possibly meaning
+	// 'out of gpu memory'. I've bumped GPU RAM up to 128MB and it doesn't seem
+	// to have helped.
+	// TODO: try limiting the range of glyphs that is loaded
+	gui.fontSpeed = io.Fonts().AddFontFromFileTTF("assets/DINMittelschriftStd.otf", 140)
 
 	// r := imgui.GlyphRangesBuilder{
 
@@ -26,16 +32,16 @@ func (gui *MotoGUI) loadFonts(io imgui.IO) {
 
 	// r := imgui.GlyphRanges(ICON_MIN_FA, ICON_MAX_FA)
 
-	rb := imgui.GlyphRangesBuilder{}
-	// rb.Add(ICON_MIN_FA'', '')
-	rb.Add('\uf200', '\uf300')
-	// rb.Add('\uf000', '\uf300')
-	// rb.Add('\uf100', '\uf1ff')
-	config.SetMergeMode(true)
-	// rb.Add('\u2000', '\uf000')
-	r := rb.Build()
-	defer r.Free()
-	gui.fontAwesome32 = io.Fonts().AddFontFromFileTTFV("assets/fa-regular-400.ttf", 32, config, r.GlyphRanges)
+	// rb := imgui.GlyphRangesBuilder{}
+	// // rb.Add(ICON_MIN_FA'', '')
+	// rb.Add('\uf200', '\uf300')
+	// // rb.Add('\uf000', '\uf300')
+	// // rb.Add('\uf100', '\uf1ff')
+	// config.SetMergeMode(true)
+	// // rb.Add('\u2000', '\uf000')
+	// r := rb.Build()
+	// defer r.Free()
+	// gui.fontAwesome32 = io.Fonts().AddFontFromFileTTFV("assets/fa-regular-400.ttf", 32, config, r.GlyphRanges)
 
-	_ = r
+	// _ = r
 }

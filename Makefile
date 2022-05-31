@@ -57,7 +57,7 @@ clean:
 	go clean
 	rm -f dash dash-armhf
 	docker rm -f crossbuild || true
-	rm -rf ${CROSSHOME}
+	sudo rm -rf ${CROSSHOME}
 
 lint:
 	# Linux (bash)

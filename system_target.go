@@ -11,7 +11,7 @@ func BuildSystem() *model.Model {
 	m := model.Model{}
 
 	ca := &cycleanalyst.CycleAnalyst3Serial{
-		DevicePath: "/dev/serial0",
+		DevicePath: "/dev/ttyUSB0",
 		Model:      &m,
 	}
 	go ca.Run()

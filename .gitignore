@@ -1,3 +1,4 @@
 .crossbuild
 dash-armhf
 dash
+.vscode/*.log

@@ -5,8 +5,6 @@ import (
 )
 
 func main() {
-	// TODO: disable screen blanking
-	//     xset s off -dpms
 	// then to turn it off programmatically
 	//     xset dpms force off
 	//     xset dpms force on
