@@ -34,17 +34,17 @@ const SabvotonInitCode = uint16(13345)
 // DumpAllValues reads all values from the controller and writes them to the
 // log. It's intended for debugging.
 func (ss *SabvotonSerial) DumpAllValues() {
-		for address := uint16(0); address < 4096; address++ {
-			// for address := uint16(2548); address < 4096; address++ {
-			var value uint16
+	for address := uint16(0); address < 4096; address++ {
+		// for address := uint16(2548); address < 4096; address++ {
+		var value uint16
 		value, err := ss.modbus.ReadRegister(address, modbus.HOLDING_REGISTER)
-			if err != nil {
-				// log.Printf("address %d failed: %v", address, err)
-				continue
-			}
-
-			log.Printf("address %d value: %d", address, value)
+		if err != nil {
+			// log.Printf("address %d failed: %v", address, err)
+			continue
 		}
+
+		log.Printf("address %d value: %d", address, value)
+	}
 }
 
 func (ss *SabvotonSerial) Run() error {
@@ -95,6 +95,7 @@ func (ss *SabvotonSerial) Run() error {
 		model.LockNStore(m, &m.ControllerTemperature, controllerTemperature)
 
 		systemStatus := ss.ReadUInt16(RegisterSystemStatus, 0)
+		// TODO: consider nullable types instead of defaults https://github.com/emvi/null
 		ss.Model.Debugs.Store("SabvotonSystemStatus", systemStatus)
 
 		motorSpeed := ss.ReadUInt16(RegisterMotorSpeed, 0xffff)

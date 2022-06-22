@@ -244,14 +244,12 @@ func (gui *MotoGUI) drawFrame(p Platform, r Renderer, m *model.Model) {
 
 	// TODO: you should leave the X and Y width at 0.0f to have it automatically fit in the column
 	fakeStateOfCharge := 1.0 - (m.BatteryAmpHoursConsumed / 16.0)
-	imgui.ProgressBarV(
-		// float32(m.BatteryStateOfCharge),
+	VerticalProgressBar(
 		float32(fakeStateOfCharge),
 		imgui.Vec2{
 			X: battWidth,
 			Y: battHeight - 180.0,
 		},
-		// fmt.Sprintf("%2d%%", int(math.Round(m.BatteryStateOfCharge))),
 		fmt.Sprintf("%2d%%", int(math.Round(fakeStateOfCharge*100.0))),
 	)
 
@@ -262,7 +260,7 @@ func (gui *MotoGUI) drawFrame(p Platform, r Renderer, m *model.Model) {
 		Y: 180.0,
 	})
 
-	imgui.ProgressBarV(
+	VerticalProgressBar(
 		float32(m.MotorTemperatureCelcius/100.0),
 		imgui.Vec2{
 			X: battWidth,
@@ -275,40 +273,46 @@ func (gui *MotoGUI) drawFrame(p Platform, r Renderer, m *model.Model) {
 		X: 160.0,
 		Y: 160.0,
 	})
-	imgui.Text(fmt.Sprintf("BatteryAmps: %0.1f", m.BatteryAmps))
+	// imgui.Text(fmt.Sprintf("BatteryAmps: %0.1f", m.BatteryAmps))
+	// imgui.SetCursorPos(imgui.Vec2{
+	// 	X: 160.0,
+	// 	Y: 200.0,
+	// })
+	// imgui.Text(fmt.Sprintf("BatteryAmpHoursConsumed: %0.1f", m.BatteryAmpHoursConsumed))
+
 	imgui.SetCursorPos(imgui.Vec2{
-		X: 160.0,
-		Y: 200.0,
-	})
-	imgui.Text(fmt.Sprintf("BatteryAmpHoursConsumed: %0.1f", m.BatteryAmpHoursConsumed))
-	imgui.SetCursorPos(imgui.Vec2{
-		X: 160.0,
-		Y: 240.0,
+		X: 480.0,
+		Y: 440.0,
 	})
 	imgui.Text(fmt.Sprintf("Distance: %0.1f", m.Distance))
-	imgui.SetCursorPos(imgui.Vec2{
-		X: 160.0,
-		Y: 280.0,
-	})
-	imgui.Text(fmt.Sprintf("Odometer: %0.0f", m.Odometer))
-	imgui.SetCursorPos(imgui.Vec2{
-		X: 160.0,
-		Y: 320.0,
-	})
-	imgui.Text(fmt.Sprintf("BatteryVolts: %0.1f", m.BatteryVoltageCA))
-	imgui.SetCursorPos(imgui.Vec2{
-		X: 160.0,
-		Y: 360.0,
-	})
-	imgui.Text(fmt.Sprintf("Power: %0.2fkW", m.BatteryVoltageCA*m.BatteryAmps/1000.0))
-	imgui.SetCursorPos(imgui.Vec2{
-		X: 160.0,
-		Y: 400.0,
-	})
-	imgui.Text(fmt.Sprintf("Gear: %s", m.Gear))
+
+	// imgui.SetCursorPos(imgui.Vec2{
+	// 	X: 160.0,
+	// 	Y: 280.0,
+	// })
+	// imgui.Text(fmt.Sprintf("Odometer: %0.0f", m.Odometer))
+
 	imgui.SetCursorPos(imgui.Vec2{
 		X: 160.0,
 		Y: 440.0,
+	})
+	imgui.Text(fmt.Sprintf("BatteryVolts: %0.1f", m.BatteryVoltageCA))
+
+	imgui.SetCursorPos(imgui.Vec2{
+		X: 160.0,
+		Y: 10.0,
+	})
+	imgui.Text(fmt.Sprintf("Power: %0.2fkW", m.BatteryVoltageCA*m.BatteryAmps/1000.0))
+
+	// imgui.SetCursorPos(imgui.Vec2{
+	// 	X: 160.0,
+	// 	Y: 400.0,
+	// })
+	// imgui.Text(fmt.Sprintf("Gear: %s", m.Gear))
+
+	imgui.SetCursorPos(imgui.Vec2{
+		X: 160.0,
+		Y: 400.0,
 	})
 	imgui.Text(fmt.Sprintf("Faults: %v", m.Faults))
 

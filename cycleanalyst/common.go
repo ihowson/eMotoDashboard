@@ -125,7 +125,7 @@ func publish(dr *CycleAnalyst3DataRow, model *model.Model) {
 	// model.Odometer = dr.Odometer
 	model.MotorTemperatureCelcius = dr.TemperatureCelcius
 
-	log.Printf("preset = %v", dr.Preset)
+	// log.Printf("preset = %v", dr.Preset)
 
 	// TODO: the faults
 
