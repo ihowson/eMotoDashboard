@@ -1,8 +1,5 @@
 #!/bin/bash
 
-#glxgears -fullscreen
-# lxterminal -e top
-
 # disable screen blanking
 env DISPLAY=:0.0 xset s off -dpms
 
@@ -10,4 +7,9 @@ env DISPLAY=:0.0 xset s off -dpms
 xrandr -o inverted
 
 # run dashboard
-./dash
+# rm /tmp/emd.log
+./dash 2>&1 | tee /tmp/emd.log
+
+# debugging
+# glxgears -fullscreen
+# lxterminal -e top

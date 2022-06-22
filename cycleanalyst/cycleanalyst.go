@@ -6,6 +6,8 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"log"
+	"time"
 
 	"go.bug.st/serial"
 
@@ -18,12 +20,14 @@ type CycleAnalyst3Serial struct {
 }
 
 func (ca *CycleAnalyst3Serial) Run() context.CancelFunc {
+	// TODO: this should take context as an arg, not return it
 	ctx, cancel := context.WithCancel(context.Background())
 
 	go func() {
 		for {
 			err := ca.loop(ctx, ca.Model)
-			fmt.Printf("Run: %v\n", err)
+			log.Printf("CycleAnalyst3Serial.Run: %v\n", err)
+			time.Sleep(500 * time.Millisecond)
 		}
 	}()
 
@@ -52,7 +56,8 @@ func (ca *CycleAnalyst3Serial) loop(ctx context.Context, model *model.Model) err
 	err = scanner.Err()
 	if err != nil {
 		// FIXME: if this fails, how do we alert the rest of the system? perhaps retry forever and fire an alarm saying 'CA not reporting data'.
-		return fmt.Errorf("reading standard input:", err)
+		// FIXME: here you might want to zero out our values in the model to show 'no data'
+		return fmt.Errorf("scanner: %w", err)
 	}
 
 	return nil

@@ -8,24 +8,21 @@ func (gui *MotoGUI) loadFonts(io imgui.IO) {
 	gui.fontDINMittel32 = io.Fonts().AddFontFromFileTTF("assets/DINMittelschriftStd.otf", 32)
 
 	// mph font
-	// config := imgui.NewFontConfig()
+	// On the RPi3B+, I get blocked test if the font size is too big. It appears
+	// that we're using too much GPU RAM or exceeding the maximum texture size.
+	// To work around this, I only load the 0-9 glyphs and use minimal
+	// oversampling.
+	fontConfig := imgui.NewFontConfig()
+	// Reduces texture size and quality. 2 is better.
+	fontConfig.SetOversampleH(1)
+	fontConfig.SetOversampleV(1)
 	// config.SetGlyphMinAdvanceX(24.0)
 	// config.SetGlyphMaxAdvanceX(24.0)
-	// gui.fontSpeed = io.Fonts().AddFontFromFileTTF("assets/DINMittelschriftStd.otf", 240)
-
-	// FIXME: I want 240 pixels here, but we get blocky text, possibly meaning
-	// 'out of gpu memory'. I've bumped GPU RAM up to 128MB and it doesn't seem
-	// to have helped.
-	// TODO: try limiting the range of glyphs that is loaded
-	gui.fontSpeed = io.Fonts().AddFontFromFileTTF("assets/DINMittelschriftStd.otf", 140)
-
-	// r := imgui.GlyphRangesBuilder{
-
-	// ICON_MIN_FA := 0xf000
-	// ICON_MAX_FA := 0xf2e0
-
-	// imgui.New
-	// range := imgui.NewGl
+	speedGlyphRangeBuilder := imgui.GlyphRangesBuilder{}
+	speedGlyphRangeBuilder.Add('0', '9')
+	speedGlyphRange := speedGlyphRangeBuilder.Build()
+	// defer speedGlyphRange.Free()
+	gui.fontSpeed = io.Fonts().AddFontFromFileTTFV("assets/DINMittelschriftStd.otf", 360, fontConfig, speedGlyphRange.GlyphRanges)
 
 	// static const ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
 	// io.Fonts->AddFontFromFileTTF("fonts/fontawesome-webfont.ttf", 13.0f, &config, icon_ranges);
@@ -33,15 +30,11 @@ func (gui *MotoGUI) loadFonts(io imgui.IO) {
 	// r := imgui.GlyphRanges(ICON_MIN_FA, ICON_MAX_FA)
 
 	// rb := imgui.GlyphRangesBuilder{}
-	// // rb.Add(ICON_MIN_FA'', '')
-	// rb.Add('\uf200', '\uf300')
-	// // rb.Add('\uf000', '\uf300')
-	// // rb.Add('\uf100', '\uf1ff')
+	// rb.Add(ICON_MIN_FA'', '')
+	// TODO: you can add individual glyphs
 	// config.SetMergeMode(true)
-	// // rb.Add('\u2000', '\uf000')
+	// rb.Add('\u2000', '\uf000')
 	// r := rb.Build()
 	// defer r.Free()
 	// gui.fontAwesome32 = io.Fonts().AddFontFromFileTTFV("assets/fa-regular-400.ttf", 32, config, r.GlyphRanges)
-
-	// _ = r
 }

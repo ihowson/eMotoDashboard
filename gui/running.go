@@ -2,7 +2,6 @@ package gui
 
 import (
 	"fmt"
-	"log"
 	"math"
 	"time"
 
@@ -68,6 +67,8 @@ func (gui *MotoGUI) run(p Platform, r Renderer) {
 
 		gui.drawFrame(p, r, m)
 
+		// ds := [2]float32{800.0, 480.0} // force screen size on Mac
+		// r.Render(ds, p.FramebufferSize(), imgui.RenderedDrawData())
 		r.Render(p.DisplaySize(), p.FramebufferSize(), imgui.RenderedDrawData())
 		p.PostRender()
 	}
@@ -129,18 +130,45 @@ func (gui *MotoGUI) drawFrame(p Platform, r Renderer, m *model.Model) {
 
 	imgui.PushFont(gui.fontDINEng32)
 
-	imgui.PushFont(gui.fontDINMittel32)
+	// STATUS ROW
+	// speed graph & clock
 
-	// fontSize := GetFontSize
-	// 	float font_size = ImGui::GetFontSize() * text.size() / 2;
-	// 	ImGui::SameLine(
-	// 	ImGui::GetWindowSize().x / 2 -
-	// 	font_size + (font_size / 2)
-	// 	);
+	// RPM graph
+	// actually speed, since we have no gears
+	// TODO: want this to change color depending on speed/RPM
+	imgui.SetCursorPos(imgui.Vec2{
+		X: 0.0,
+		Y: 0.0,
+	})
+	imgui.ProgressBarV(
+		float32(m.SpeedMph/70.0),
+		imgui.Vec2{
+			X: 800.0,
+			Y: 80.0,
+		},
+		"",
+	)
 
+	// TODO: status icons would go here
+
+	// clock
 	now := time.Now()
-	imgui.Text(fmt.Sprintf("%02d:%02d", now.Hour(), now.Minute()))
+	clockText := fmt.Sprintf("%02d:%02d", now.Hour(), now.Minute())
+	clockWidth := imgui.CalcTextSize(clockText, false, -1).X
+	// imgui.SetCursorScreenPos(imgui.Vec2{
+	imgui.SetCursorPos(imgui.Vec2{
+		X: 800.0 - clockWidth - 5.0,
+		Y: 5.0,
+	})
+	imgui.Text(clockText)
 	imgui.PopFont()
+
+	// MIDDLE 3COL
+
+	// use tables https://github.com/ocornut/imgui/blob/f58bd817e2998489bace1b2dff49884eac790efb/imgui_tables.cpp
+	// then SetColumnWidth
+
+	imgui.PushFont(gui.fontDINMittel32)
 
 	col := imgui.StyleColorID(imgui.StyleColorText)
 
@@ -152,25 +180,30 @@ func (gui *MotoGUI) drawFrame(p Platform, r Renderer, m *model.Model) {
 	}
 
 	// SPEEDO
-	speedoWidth := float32(400.)
-	speedoHeight := float32(300.)
+	// speedoWidth := float32(400.)
+	// speedoHeight := float32(300.)
+	// imgui.SetCursorPos(imgui.Vec2{
+	// 	X: (gui.width - speedoWidth) - (speedoWidth / 2),
+	// 	Y: (gui.height - speedoHeight) - (speedoHeight / 2),
+	// })
 	imgui.SetCursorPos(imgui.Vec2{
-		X: (gui.width - speedoWidth) - (speedoWidth / 2),
-		Y: (gui.height - speedoHeight) - (speedoHeight / 2),
+		X: 240.0,
+		Y: 120.0,
 	})
 	imgui.PushStyleColor(col, color)
 	imgui.PushFont(gui.fontSpeed)
 
 	// speed := m.LockNLoadFloat64(&m.Speed)
-	// imgui.Text(fmt.Sprintf("%2d", rand.Intn(71)))
-	log.Printf("read speed %v %v\n", m.SpeedMph, int(math.Round(m.SpeedMph)))
-	intSpeed := int(math.Round(m.SpeedMph))
-	strSpeed := fmt.Sprintf("%2d", intSpeed)
+	intSpeed := int(math.Round(m.SpeedMph)) // TODO: use LockNLoad or an atomic read here
+	// log.Printf("%d", intSpeed)
+	// strSpeed := fmt.Sprintf("%02d", intSpeed)
+	// TODO: want this right-aligned. seems to 9-pad it with %2d
+	strSpeed := fmt.Sprintf("%d", intSpeed)
 	// %2d doesn't seem to pad spaces if the value is zero
 	// also ' ' seems to be half-width? We should be locking the font width.
-	if intSpeed == 0 {
-		strSpeed = "  0"
-	}
+	// if intSpeed == 0 {
+	// 	strSpeed = "  0"
+	// }
 	// strSpeed = ".00."
 	imgui.Text(strSpeed)
 	imgui.PopFont()
@@ -188,26 +221,96 @@ func (gui *MotoGUI) drawFrame(p Platform, r Renderer, m *model.Model) {
 	// 	200.0,
 	// 	imgui.PackedColor(0xaabbcc80),
 	// )
+	/*
+		imgui.WindowDrawList().PathArcTo(
+			imgui.Vec2{X: 400, Y: 240},
+			100.0,
+			0.25,
+			0.75,
+			12,
+		)
+	*/
+	// func (list DrawList) PathArcTo(center Vec2, radius, a_min, a_max float32, num_segments int)
 
 	// battery bar
-	battWidth := float32(50.)
-	battHeight := float32(gui.height - 50.0)
+	battWidth := float32(80.)
+	battHeight := float32(gui.height)
 
+	// might as well use all of the space available
 	imgui.SetCursorPos(imgui.Vec2{
-		X: 25.0,
-		Y: 25.0,
+		X: 0.0,
+		Y: 180.0,
+	})
+
+	// TODO: you should leave the X and Y width at 0.0f to have it automatically fit in the column
+	fakeStateOfCharge := 1.0 - (m.BatteryAmpHoursConsumed / 16.0)
+	imgui.ProgressBarV(
+		// float32(m.BatteryStateOfCharge),
+		float32(fakeStateOfCharge),
+		imgui.Vec2{
+			X: battWidth,
+			Y: battHeight - 180.0,
+		},
+		// fmt.Sprintf("%2d%%", int(math.Round(m.BatteryStateOfCharge))),
+		fmt.Sprintf("%2d%%", int(math.Round(fakeStateOfCharge*100.0))),
+	)
+
+	// temperature gaug
+	// might as well use all of the space available
+	imgui.SetCursorPos(imgui.Vec2{
+		X: 720.0,
+		Y: 180.0,
 	})
 
 	imgui.ProgressBarV(
-		float32(m.BatteryStateOfCharge),
+		float32(m.MotorTemperatureCelcius/100.0),
 		imgui.Vec2{
 			X: battWidth,
-			Y: battHeight,
+			Y: battHeight - 180.0,
 		},
-		fmt.Sprintf("%2d%%", int(math.Round(m.BatteryStateOfCharge))),
+		fmt.Sprintf("%d C", int(math.Round(m.MotorTemperatureCelcius))),
 	)
 
-	// imgui.Text(now.String())
+	imgui.SetCursorPos(imgui.Vec2{
+		X: 160.0,
+		Y: 160.0,
+	})
+	imgui.Text(fmt.Sprintf("BatteryAmps: %0.1f", m.BatteryAmps))
+	imgui.SetCursorPos(imgui.Vec2{
+		X: 160.0,
+		Y: 200.0,
+	})
+	imgui.Text(fmt.Sprintf("BatteryAmpHoursConsumed: %0.1f", m.BatteryAmpHoursConsumed))
+	imgui.SetCursorPos(imgui.Vec2{
+		X: 160.0,
+		Y: 240.0,
+	})
+	imgui.Text(fmt.Sprintf("Distance: %0.1f", m.Distance))
+	imgui.SetCursorPos(imgui.Vec2{
+		X: 160.0,
+		Y: 280.0,
+	})
+	imgui.Text(fmt.Sprintf("Odometer: %0.0f", m.Odometer))
+	imgui.SetCursorPos(imgui.Vec2{
+		X: 160.0,
+		Y: 320.0,
+	})
+	imgui.Text(fmt.Sprintf("BatteryVolts: %0.1f", m.BatteryVoltageCA))
+	imgui.SetCursorPos(imgui.Vec2{
+		X: 160.0,
+		Y: 360.0,
+	})
+	imgui.Text(fmt.Sprintf("Power: %0.2fkW", m.BatteryVoltageCA*m.BatteryAmps/1000.0))
+	imgui.SetCursorPos(imgui.Vec2{
+		X: 160.0,
+		Y: 400.0,
+	})
+	imgui.Text(fmt.Sprintf("Gear: %s", m.Gear))
+	imgui.SetCursorPos(imgui.Vec2{
+		X: 160.0,
+		Y: 440.0,
+	})
+	imgui.Text(fmt.Sprintf("Faults: %v", m.Faults))
 
 	// imgui.PushFont(gui.fontAwesome32)
 	// imgui.Text("             ")
@@ -238,5 +341,7 @@ func (gui *MotoGUI) drawFrame(p Platform, r Renderer, m *model.Model) {
 	// TODO: insert skia/svg/whatever draw layer here
 
 	// FIXME: maybe you can lock the size here?
+
+	// FIXME: add a tap zone to go to Debugging or the other pages
 
 }

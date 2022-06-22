@@ -1,7 +1,7 @@
 package cycleanalyst
 
 import (
-	"fmt"
+	"log"
 	"regexp"
 	"strconv"
 	"strings"
@@ -25,7 +25,7 @@ type CycleAnalyst3DataRow struct {
 	ThrottleInVoltage  float64
 	ThrottleOutVoltage float64
 	Acceleration       float64
-	// Unknown            float64
+	// Unknown            float64 // TODO: this is the preset 'modified value'
 	Preset int
 
 	// limit flags
@@ -48,18 +48,27 @@ func parseLine(row string) *CycleAnalyst3DataRow {
 	// Split the fields.
 	fields := regexp.MustCompile("[ \t]+").Split(row, -1)
 
-	if len(fields) < 13 {
+	if len(fields) < 14 {
+		log.Printf("short row '%v'", fields)
 		return nil
 	}
 
 	flags := fields[13]
-
 	preset, err := strconv.Atoi(flags[0:1])
 	if err != nil {
 		preset = -1
 	}
 
-	fmt.Printf("Unknown fields[12] = '%s'\n", fields[12])
+	// this is the 'controlled value' for the preset -- 0 for 0% throttle, 99.9 for 99.9% throttle
+	// FIXME: don't use this; use the Flags field instead
+	switch fields[12] {
+	case "0.00":
+		preset = 1
+	case "99.9":
+		preset = 2
+	default:
+		preset = -1
+	}
 
 	return &CycleAnalyst3DataRow{
 		Timestamp: time.Now(),
@@ -101,20 +110,37 @@ func parseLine(row string) *CycleAnalyst3DataRow {
 
 func publish(dr *CycleAnalyst3DataRow, model *model.Model) {
 	if dr == nil || model == nil {
-		fmt.Printf("not publishing: dr=%p model=%p\n", dr, model)
+		log.Printf("not publishing: dr=%p model=%p\n", dr, model)
 		return
 	}
 	// write the data into the model
 	model.Lock.Lock()
 	defer model.Lock.Unlock()
 
+	model.BatteryVoltageCA = dr.Voltage
 	model.SpeedMph = dr.Speed
 	model.BatteryAmps = dr.Amperes
 	model.BatteryAmpHoursConsumed = dr.AmpHours
 	model.Distance = dr.Distance
 	// model.Odometer = dr.Odometer
 	model.MotorTemperatureCelcius = dr.TemperatureCelcius
-	// model.Gear = dr.Preset
+
+	log.Printf("preset = %v", dr.Preset)
+
+	// TODO: the faults
+
+	switch dr.Preset {
+	case 1:
+		model.Gear = "N"
+	case 2:
+		model.Gear = "1"
+	case 3:
+		model.Gear = "2"
+	default:
+		model.Gear = "?"
+	}
 
 	// TODO: the rest of the fields
+
+	// TODO: you need to blank out the fields if there is no data -- find a 'mmissing daat' lib
 }

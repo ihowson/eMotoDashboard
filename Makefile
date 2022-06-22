@@ -1,10 +1,11 @@
-.PHONY: all deploy clean lint crossshell target
+.PHONY: all deploy clean lint crossshell copy
 
 
 UID := $(shell id -u)
+# GID := $(shell id -g)
 GID := $(id -g)
-USERNAME := $(id -un)
-GROUPNAME := $(id -gn)
+USERNAME := $(shell id -un)
+GROUPNAME := $(shell id -gn)
 CROSSHOME := "${HOME}"/crosshome
 
 CROSS_DOCKER := docker run --rm -it -u=${UID}:${GID} -v '${PWD}':/src -v ${CROSSHOME}:/home -e HOME=/home -e BUILDER_UID=${UID} -e BUILDER_GID=${GID} -e BUILDER_USER=${USERNAME} -e BUILDER_GROUP=${GROUPNAME} -w /src crossbuild
@@ -26,7 +27,7 @@ dash-armhf: .crossbuild $(shell find . -name '*.go')
 	# sudo chown ${USERNAME}:${GROUPNAME} ${CROSSHOME}
 	# FIXME: hack
 	chmod 777 ${CROSSHOME}
-	${CROSS_DOCKER} bash -c 'PKG_CONFIG=arm-linux-gnueabihf-pkg-config GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CXX=arm-linux-gnueabihf-g++ CC=arm-linux-gnueabihf-gcc LD=arm-linux-gnueabihf-ld go build -o dash-armhf -tags="imguifreetype" -tags=target .'
+	${CROSS_DOCKER} bash -c 'PKG_CONFIG=arm-linux-gnueabihf-pkg-config GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CXX=arm-linux-gnueabihf-g++ CC=arm-linux-gnueabihf-gcc LD=arm-linux-gnueabihf-ld go build -o dash-armhf -tags=target .'
 
 crossshell: .crossbuild
 	mkdir -p ${CROSSHOME}
@@ -37,13 +38,17 @@ crossshell: .crossbuild
 	${CROSS_DOCKER} /bin/bash
 
 dash: $(shell find . -name '*.go')
-	go build -o dash -tags="imguifreetype" -tags=mock .
+	go build -o dash -tags=mock .
 
 deploy: dash-armhf
 	rsync -avxP dash-armhf emoto:dash
 	rsync -avxP kiosk.sh emoto:kiosk.sh
 	rsync -avxP assets/ emoto:assets/
 	ssh emoto sudo service lightdm restart
+
+copy: dash-armhf
+	rsync -avxP dash-armhf emoto:dash
+	rsync -avxP assets/ emoto:assets/
 
 .crossbuild: Dockerfile
 	docker build -t crossbuild .
