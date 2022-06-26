@@ -23,7 +23,12 @@ func VerticalProgressBar(percent float32, size imgui.Vec2, label string) {
 	dl.AddRectFilled(bgMin, max, bgColor)
 
 	// foreground bar fill
-	dl.AddRectFilled(fgMin, max, fgColor)
+	// log.Printf("fgMin=%v max=%v", fgMin, max)
+	if max.Y > fgMin.Y {
+		dl.AddRectFilled(fgMin, max, fgColor)
+	} else {
+		// log.Printf("out of range fgMin=%v max=%v", fgMin, max)
+	}
 
 	// center label in bar (ish) // FIXME: horizontal spacing is wrong
 	imgui.SetCursorPos(max.Minus(bgMin).Times(0.5).Plus(bgMin))

@@ -14,6 +14,7 @@ work based on slothorpe's documentation, but I haven't tested it.
 package sabvoton
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"math"
@@ -47,7 +48,9 @@ func (ss *SabvotonSerial) DumpAllValues() {
 	}
 }
 
-func (ss *SabvotonSerial) Run() error {
+func (ss *SabvotonSerial) Run(ctx context.Context) error {
+	// TODO: honor ctx.Done()
+
 	client, err := modbus.NewClient(&modbus.ClientConfiguration{
 		URL:      fmt.Sprintf("rtu://%s", ss.DevicePath),
 		Speed:    19200,
@@ -73,11 +76,11 @@ func (ss *SabvotonSerial) Run() error {
 	client.SetUnitId(1)
 
 	// send init sequence
-	_ = client.WriteRegister(RegisterAccelerateTime.Address, SabvotonInitCode)
+	_ = client.WriteRegister(RegisterInitial.Address, SabvotonInitCode)
 	time.Sleep(50 * time.Millisecond)
-	_ = client.WriteRegister(RegisterAccelerateTime.Address, SabvotonInitCode)
+	_ = client.WriteRegister(RegisterInitial.Address, SabvotonInitCode)
 	time.Sleep(50 * time.Millisecond)
-	err = client.WriteRegister(RegisterAccelerateTime.Address, SabvotonInitCode)
+	err = client.WriteRegister(RegisterInitial.Address, SabvotonInitCode)
 	if err != nil {
 		return fmt.Errorf("failed to init Sabvoton: %w", err)
 	}
@@ -106,6 +109,8 @@ func (ss *SabvotonSerial) Run() error {
 
 		batteryVoltage := ss.ReadFloat(RegisterBatteryVoltage, math.NaN())
 		ss.Model.Debugs.Store("SabvotonBatteryVoltage", batteryVoltage)
+
+		log.Printf("controllerTemperature=%v systemStatus=%v motorSpeed=%v mosfetStatus=%v batteryVoltage=%v", controllerTemperature, systemStatus, motorSpeed, mosfetStatus, batteryVoltage)
 	}
 
 	return nil

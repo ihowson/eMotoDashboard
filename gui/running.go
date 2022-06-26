@@ -5,6 +5,7 @@ import (
 	"math"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
 	imgui "github.com/inkyblackness/imgui-go/v4"
 
 	"github.com/ihowson/eMotoDashboard/m/v2/dupe/platforms"
@@ -180,23 +181,15 @@ func (gui *MotoGUI) drawFrame(p Platform, r Renderer, m *model.Model) {
 	}
 
 	// SPEEDO
-	// speedoWidth := float32(400.)
-	// speedoHeight := float32(300.)
-	// imgui.SetCursorPos(imgui.Vec2{
-	// 	X: (gui.width - speedoWidth) - (speedoWidth / 2),
-	// 	Y: (gui.height - speedoHeight) - (speedoHeight / 2),
-	// })
 	imgui.SetCursorPos(imgui.Vec2{
 		X: 240.0,
 		Y: 120.0,
 	})
 	imgui.PushStyleColor(col, color)
 	imgui.PushFont(gui.fontSpeed)
-
 	// speed := m.LockNLoadFloat64(&m.Speed)
 	intSpeed := int(math.Round(m.SpeedMph)) // TODO: use LockNLoad or an atomic read here
-	// log.Printf("%d", intSpeed)
-	// strSpeed := fmt.Sprintf("%02d", intSpeed)
+
 	// TODO: want this right-aligned. seems to 9-pad it with %2d
 	strSpeed := fmt.Sprintf("%d", intSpeed)
 	// %2d doesn't seem to pad spaces if the value is zero
@@ -210,29 +203,10 @@ func (gui *MotoGUI) drawFrame(p Platform, r Renderer, m *model.Model) {
 	imgui.PopStyleColor()
 
 	imgui.SameLine()
-
 	imgui.Text("mph")
 
-	// imgui.WindowDrawList().AddCircleFilled(
-	// 	imgui.Vec2{
-	// 		X: 400,
-	// 		Y: 240,
-	// 	},
-	// 	200.0,
-	// 	imgui.PackedColor(0xaabbcc80),
-	// )
-	/*
-		imgui.WindowDrawList().PathArcTo(
-			imgui.Vec2{X: 400, Y: 240},
-			100.0,
-			0.25,
-			0.75,
-			12,
-		)
-	*/
-	// func (list DrawList) PathArcTo(center Vec2, radius, a_min, a_max float32, num_segments int)
-
 	// battery bar
+	imgui.PushFont(gui.fontDINEng32)
 	battWidth := float32(80.)
 	battHeight := float32(gui.height)
 
@@ -303,12 +277,21 @@ func (gui *MotoGUI) drawFrame(p Platform, r Renderer, m *model.Model) {
 		Y: 10.0,
 	})
 	imgui.Text(fmt.Sprintf("Power: %0.2fkW", m.BatteryVoltageCA*m.BatteryAmps/1000.0))
+	imgui.PopFont()
 
-	// imgui.SetCursorPos(imgui.Vec2{
-	// 	X: 160.0,
-	// 	Y: 400.0,
-	// })
-	// imgui.Text(fmt.Sprintf("Gear: %s", m.Gear))
+	imgui.PushFont(imgui.DefaultFont)
+	imgui.SetCursorPos(imgui.Vec2{
+		X: 160.0,
+		Y: 240.0,
+	})
+	imgui.Text(fmt.Sprintf("Debugs: %s", spew.Sdump(m.Debugs)))
+	imgui.PopFont()
+
+	imgui.SetCursorPos(imgui.Vec2{
+		X: 160.0,
+		Y: 360.0,
+	})
+	imgui.Text(fmt.Sprintf("Ctrlr Temp: %v", m.ControllerTemperature))
 
 	imgui.SetCursorPos(imgui.Vec2{
 		X: 160.0,

@@ -6,8 +6,6 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"log"
-	"time"
 
 	"go.bug.st/serial"
 
@@ -19,22 +17,7 @@ type CycleAnalyst3Serial struct {
 	Model      *model.Model
 }
 
-func (ca *CycleAnalyst3Serial) Run() context.CancelFunc {
-	// TODO: this should take context as an arg, not return it
-	ctx, cancel := context.WithCancel(context.Background())
-
-	go func() {
-		for {
-			err := ca.loop(ctx, ca.Model)
-			log.Printf("CycleAnalyst3Serial.Run: %v\n", err)
-			time.Sleep(500 * time.Millisecond)
-		}
-	}()
-
-	return cancel
-}
-
-func (ca *CycleAnalyst3Serial) loop(ctx context.Context, model *model.Model) error {
+func (ca *CycleAnalyst3Serial) Run(ctx context.Context) error {
 	mode := &serial.Mode{
 		BaudRate: 9600,
 		Parity:   serial.NoParity,
