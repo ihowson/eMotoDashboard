@@ -1,4 +1,4 @@
-module github.com/ihowson/eMotoDashboard/m/v2
+module github.com/ihowson/eMotoDashboard
 
 go 1.18
 

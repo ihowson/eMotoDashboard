@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ihowson/eMotoDashboard/m/v2/model"
+	"github.com/ihowson/eMotoDashboard/model"
 )
 
 // CycleAnalyst3Mock loads a log file from disk and replays it with similar

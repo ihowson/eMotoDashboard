@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"unsafe"
 
-	"github.com/ihowson/eMotoDashboard/m/v2/dupe/renderers/gl/v2.1/gl"
+	"github.com/ihowson/eMotoDashboard/dupe/renderers/gl/v2.1/gl"
 	"github.com/inkyblackness/imgui-go/v4"
 )
 

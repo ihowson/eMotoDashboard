@@ -9,7 +9,7 @@ import (
 
 	"go.bug.st/serial"
 
-	"github.com/ihowson/eMotoDashboard/m/v2/model"
+	"github.com/ihowson/eMotoDashboard/model"
 )
 
 type CycleAnalyst3Serial struct {

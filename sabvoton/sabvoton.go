@@ -20,7 +20,7 @@ import (
 	"math"
 	"time"
 
-	"github.com/ihowson/eMotoDashboard/m/v2/model"
+	"github.com/ihowson/eMotoDashboard/model"
 	"github.com/simonvetter/modbus"
 )
 

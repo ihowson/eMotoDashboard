@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ihowson/eMotoDashboard/m/v2/model"
+	"github.com/ihowson/eMotoDashboard/model"
 )
 
 type CycleAnalyst3DataRow struct {
