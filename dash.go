@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/ihowson/eMotoDashboard/bike"
 	"github.com/ihowson/eMotoDashboard/gui"
 )
 
@@ -9,10 +10,11 @@ func main() {
 	//     xset dpms force off
 	//     xset dpms force on
 
-	model := BuildSystem()
+	model, bike := bike.Build()
 
 	gui := gui.MotoGUI{
 		Model: model,
+		Bike:  bike,
 	}
 	gui.Run()
 

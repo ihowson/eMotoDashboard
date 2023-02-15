@@ -1,13 +1,13 @@
 //go:build mock
 
-package main
+package bike
 
 import (
-	"github.com/ihowson/eMotoDashboard/m/v2/cycleanalyst"
-	"github.com/ihowson/eMotoDashboard/m/v2/model"
+	"github.com/ihowson/eMotoDashboard/cycleanalyst"
+	"github.com/ihowson/eMotoDashboard/model"
 )
 
-func BuildSystem() *model.Model {
+func Build() (*model.Model, *Bike) {
 	m := model.Model{}
 
 	ca := &cycleanalyst.CycleAnalyst3Mock{

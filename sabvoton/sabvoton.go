@@ -93,7 +93,7 @@ func (ss *SabvotonSerial) Run(ctx context.Context) error {
 
 	for ctx.Err() == nil {
 		controllerTemperature := ss.ReadFloat(RegisterControllerTemperature, math.NaN())
-		model.LockNStore(m, &m.ControllerTemperature, controllerTemperature)
+		model.LockNStore(m, &m.ControllerTemperatureCelcius, controllerTemperature)
 
 		systemStatus := ss.ReadUInt16(RegisterSystemStatus, 0)
 		// TODO: consider nullable types instead of defaults https://github.com/emvi/null

@@ -6,6 +6,8 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"sync"
+	"time"
 
 	"go.bug.st/serial"
 
@@ -15,6 +17,16 @@ import (
 type CycleAnalyst3Serial struct {
 	DevicePath string
 	Model      *model.Model
+
+	lastUpdate time.Time
+	lock       sync.Mutex
+}
+
+func (ca *CycleAnalyst3Serial) LastUpdate() time.Time {
+	ca.lock.Lock()
+	defer ca.lock.Unlock()
+
+	return ca.lastUpdate
 }
 
 func (ca *CycleAnalyst3Serial) Run(ctx context.Context) error {
@@ -35,6 +47,10 @@ func (ca *CycleAnalyst3Serial) Run(ctx context.Context) error {
 	for scanner.Scan() {
 		dr := parseLine(scanner.Text())
 		publish(dr, ca.Model)
+
+		ca.lock.Lock()
+		ca.lastUpdate = time.Now()
+		ca.lock.Unlock()
 	}
 	err = scanner.Err()
 	if err != nil {

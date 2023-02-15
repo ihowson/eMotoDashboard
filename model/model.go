@@ -7,6 +7,15 @@ import (
 // Abstract vehicle model
 // This represents the whole 'state' of the vehicle. Hardware and mock
 // interfaces mutate this.
+//
+// NOTE: I gave up on this approach around 230210; it's just a lot of work for
+// not much benefit. There are lots of places where we get multiple readings on
+// the same physical measure (e.g. 'battery %') and we need to know where it
+// came from. Future interactions will keep the last observed state of each of
+// the four main components (controller, CAv3, BMS and BDC.)
+//
+// This has the downside of linking the model to the exact hardware
+// components. Flexibility isn't my priority here.
 type Model struct {
 	SpeedMph                float64 // TODO: mph or kph?
 	BatteryAmps             float64
@@ -18,9 +27,9 @@ type Model struct {
 	Gear                    string // 'N', '2', '3'
 	Faults                  []string
 
-	ControllerTemperature    float64
-	BatteryVoltageCA         float64
-	BatteryVoltageController float64 // TODO: difference here might measure sag in your wiring?
+	ControllerTemperatureCelcius float64
+	BatteryVoltageCA             float64
+	BatteryVoltageController     float64 // TODO: difference here might measure sag in your wiring?
 
 	FluxWeakeningActive  bool
 	ControllerMotorSpeed uint16 // FIXME: not sure what this is; does it give you an RPM? or is it another speed measurement?
