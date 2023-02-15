@@ -41,14 +41,8 @@ dash: $(shell find . -name '*.go')
 	go build -o dash -tags=mock .
 
 deploy: dash-armhf
-	rsync -avxP dash-armhf emoto:dash
-	rsync -avxP kiosk.sh emoto:kiosk.sh
-	rsync -avxP assets/ emoto:assets/
-	ssh emoto sudo service lightdm restart
-
-copy: dash-armhf
-	rsync -avxP dash-armhf emoto:dash
-	rsync -avxP assets/ emoto:assets/
+	rsync -avxP dash-armhf kiosk.sh assets emoto:
+	ssh emoto killall dash-armhf || true
 
 .crossbuild: Dockerfile
 	docker build -t crossbuild .
