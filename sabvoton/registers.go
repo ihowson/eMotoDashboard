@@ -28,85 +28,88 @@ type RegisterFloat16 struct {
 	Sample    float32
 }
 
-var RegisterDCCurrentLimitVoltage = RegisterUInt16{Address: 2548, Sample: 40}
-var RegisterLackVoltage = RegisterUInt16{Address: 2549, Sample: 40}
-var RegisterOverVoltage = RegisterUInt16{Address: 2550, Sample: 88}
-var RegisterRatedDCCurrent = RegisterUInt16{Address: 2551, Sample: 120}
-var RegisterMaxDCCurrent = RegisterUInt16{Address: 2552, Sample: 120}
-var RegisterMaxPhaseCurrent = RegisterUInt16{Address: 2553, Sample: 350}
-var RegisterProtectedPhaseCurrent = RegisterUInt16{Address: 2554, Sample: 450}
-var RegisterRatedPhaseCurrent = RegisterUInt16{Address: 2559, Sample: 150}
-var RegisterControllerTemperature = RegisterFloat16{Address: 2562, Precision: Single, Sample: 32.97} // TODO: update with sample from your controller . There are two controller temperature -- which one is correct?
-var RegisterUnderworkTemperature = RegisterUInt16{Address: 2568, Sample: 90}
-var RegisterReworkTemperature = RegisterUInt16{Address: 2569, Sample: 80}
-var RegisterLimitedCurrentTemperature = RegisterUInt16{Address: 2570, Sample: 70}
-var RegisterMotorUnderworkTemperature = RegisterUInt16{Address: 2571, Sample: 130}
-var RegisterMotorReworkTemperature = RegisterUInt16{Address: 2572, Sample: 110}
-var RegisterMotorLimitedCurrentTemperature = RegisterUInt16{Address: 2573, Sample: 95}
-var RegisterMotorTemperatureSensorEnabled = RegisterUInt16{Address: 2574, Sample: 0} // my controller doesn't have this register
-var RegisterCurrentUnlockFlag = RegisterUInt16{Address: 2595, Sample: 3}
-var RegisterReverseCurrentLimit = RegisterUInt16{Address: 2596, Sample: 20}
-var RegisterFluxWeakeningEnabled = RegisterUInt16{Address: 2597, Sample: 1}
-var RegisterFluxWeakenCurrent = RegisterUInt16{Address: 2598, Sample: 50}
-var RegisterEbrakePhaseCurrent = RegisterUInt16{Address: 2599, Sample: 32}
-var RegisterSlideRechargeEnabled = RegisterUInt16{Address: 2600, Sample: 0}
-var RegisterSlideRechargePhaseCurrent = RegisterUInt16{Address: 2601, Sample: 30}
-var RegisterSlideRechargeSpeed = RegisterUInt16{Address: 2602, Sample: 100}
+//nolint:gochecknoglobals
+var (
+	RegisterDCCurrentLimitVoltage          = RegisterUInt16{Address: 2548, Sample: 40}
+	RegisterLackVoltage                    = RegisterUInt16{Address: 2549, Sample: 40}
+	RegisterOverVoltage                    = RegisterUInt16{Address: 2550, Sample: 88}
+	RegisterRatedDCCurrent                 = RegisterUInt16{Address: 2551, Sample: 120}
+	RegisterMaxDCCurrent                   = RegisterUInt16{Address: 2552, Sample: 120}
+	RegisterMaxPhaseCurrent                = RegisterUInt16{Address: 2553, Sample: 350}
+	RegisterProtectedPhaseCurrent          = RegisterUInt16{Address: 2554, Sample: 450}
+	RegisterRatedPhaseCurrent              = RegisterUInt16{Address: 2559, Sample: 150}
+	RegisterControllerTemperature          = RegisterFloat16{Address: 2562, Precision: Single, Sample: 32.97} // TODO: update with sample from your controller . There are two controller temperature -- which one is correct? . This doesn't seem to be the right one.
+	RegisterUnderworkTemperature           = RegisterUInt16{Address: 2568, Sample: 90}
+	RegisterReworkTemperature              = RegisterUInt16{Address: 2569, Sample: 80}
+	RegisterLimitedCurrentTemperature      = RegisterUInt16{Address: 2570, Sample: 70}
+	RegisterMotorUnderworkTemperature      = RegisterUInt16{Address: 2571, Sample: 130}
+	RegisterMotorReworkTemperature         = RegisterUInt16{Address: 2572, Sample: 110}
+	RegisterMotorLimitedCurrentTemperature = RegisterUInt16{Address: 2573, Sample: 95}
+	RegisterMotorTemperatureSensorEnabled  = RegisterUInt16{Address: 2574, Sample: 0} // my controller doesn't have this register
+	RegisterCurrentUnlockFlag              = RegisterUInt16{Address: 2595, Sample: 3}
+	RegisterReverseCurrentLimit            = RegisterUInt16{Address: 2596, Sample: 20}
+	RegisterFluxWeakeningEnabled           = RegisterUInt16{Address: 2597, Sample: 1}
+	RegisterFluxWeakenCurrent              = RegisterUInt16{Address: 2598, Sample: 50}
+	RegisterEbrakePhaseCurrent             = RegisterUInt16{Address: 2599, Sample: 32}
+	RegisterSlideRechargeEnabled           = RegisterUInt16{Address: 2600, Sample: 0}
+	RegisterSlideRechargePhaseCurrent      = RegisterUInt16{Address: 2601, Sample: 30}
+	RegisterSlideRechargeSpeed             = RegisterUInt16{Address: 2602, Sample: 100}
 
-var RegisterThrottleMinVoltage = RegisterFloat16{Address: 2608, Precision: Double, Sample: 0.75}
-var RegisterThrottleMaxVoltage = RegisterFloat16{Address: 2609, Precision: Double, Sample: 4.0}
-var RegisterAccelerateTime = RegisterUInt16{Address: 2610, Sample: 1}
-var RegisterDecelerateTime = RegisterUInt16{Address: 2611, Sample: 1}
+	RegisterThrottleMinVoltage = RegisterFloat16{Address: 2608, Precision: Double, Sample: 0.75}
+	RegisterThrottleMaxVoltage = RegisterFloat16{Address: 2609, Precision: Double, Sample: 4.0}
+	RegisterAccelerateTime     = RegisterUInt16{Address: 2610, Sample: 1}
+	RegisterDecelerateTime     = RegisterUInt16{Address: 2611, Sample: 1}
 
-var RegisterThrottleMidVoltage = RegisterFloat16{Address: 2612, Precision: Double, Sample: 2.8}
-var RegisterThrottleMidPhaseCurrent = RegisterUInt16{Address: 2613, Sample: 150}
-var RegisterMotorPN = RegisterUInt16{Address: 2631, Sample: 16}
-var RegisterMotorLmd = RegisterUInt16{Address: 2634, Sample: 50}
-var RegisterSpeedLimitModeSelect = RegisterUInt16{Address: 2635, Sample: 0}
-var RegisterMotorLimitSpeedSet = RegisterUInt16{Address: 2636, Sample: 100}
-var RegisterLowSpeedSet = RegisterUInt16{Address: 2637, Sample: 70}
-var RegisterMiddleSpeedSet = RegisterUInt16{Address: 2638, Sample: 100}
-var RegisterCurrentLoopKp = RegisterUInt16{Address: 2648, Sample: 300}
-var RegisterCurrentLoopKi = RegisterUInt16{Address: 2649, Sample: 9}
-var RegisterHallAngleTestEnabled = RegisterUInt16{Address: 2650, Sample: 0}
+	RegisterThrottleMidVoltage      = RegisterFloat16{Address: 2612, Precision: Double, Sample: 2.8}
+	RegisterThrottleMidPhaseCurrent = RegisterUInt16{Address: 2613, Sample: 150}
+	RegisterMotorPN                 = RegisterUInt16{Address: 2631, Sample: 16}
+	RegisterMotorLmd                = RegisterUInt16{Address: 2634, Sample: 50}
+	RegisterSpeedLimitModeSelect    = RegisterUInt16{Address: 2635, Sample: 0}
+	RegisterMotorLimitSpeedSet      = RegisterUInt16{Address: 2636, Sample: 100}
+	RegisterLowSpeedSet             = RegisterUInt16{Address: 2637, Sample: 70}
+	RegisterMiddleSpeedSet          = RegisterUInt16{Address: 2638, Sample: 100}
+	RegisterCurrentLoopKp           = RegisterUInt16{Address: 2648, Sample: 300}
+	RegisterCurrentLoopKi           = RegisterUInt16{Address: 2649, Sample: 9}
+	RegisterHallAngleTestEnabled    = RegisterUInt16{Address: 2650, Sample: 0}
 
-var RegisterControlMode = RegisterUInt16{Address: 2651, Sample: 0} // 0=Normal 1=HallAngleTest
-var RegisterTestCurrent = RegisterUInt16{Address: 2652, Sample: 0}
-var RegisterHallAngle = RegisterUInt16{Address: 2653, Sample: 243}
-var RegisterSystemStatus = RegisterUInt16{Address: 2748, Sample: 23}
+	RegisterControlMode  = RegisterUInt16{Address: 2651, Sample: 0} // 0=Normal 1=HallAngleTest
+	RegisterTestCurrent  = RegisterUInt16{Address: 2652, Sample: 0}
+	RegisterHallAngle    = RegisterUInt16{Address: 2653, Sample: 243}
+	RegisterSystemStatus = RegisterUInt16{Address: 2748, Sample: 23}
 
-/*
-	0 PowerUpNoFinishedLackVoltage
-	1 SystemError
-	3 ThrottleProtect
-	4 HallAngleTest
-	5 CurrentDebug
-	7 VoltDebug
-	20 ElectronicBrake
-	21 StopBrake
-	22 SlideRecharge
-	23 RunningFluxWeakenEnabled
-	24 RunningFluxWeakenDisabled
-	25 MotorReverse
-	26 BrakeProtect
-	27 GuardAgainstTheft
-*/
+	/*
+		0 PowerUpNoFinishedLackVoltage
+		1 SystemError
+		3 ThrottleProtect
+		4 HallAngleTest
+		5 CurrentDebug
+		7 VoltDebug
+		20 ElectronicBrake
+		21 StopBrake
+		22 SlideRecharge
+		23 RunningFluxWeakenEnabled
+		24 RunningFluxWeakenDisabled
+		25 MotorReverse
+		26 BrakeProtect
+		27 GuardAgainstTheft
+	*/
 
-var RegisterBatteryVoltage = RegisterFloat16{Address: 2749, Precision: Single, Sample: 67.63736264}
-var RegisterWeakenCurrentCommand = RegisterUInt16{Address: 2750, Sample: 0}
-var RegisterWeakenCurrentFeedback = RegisterUInt16{Address: 2751, Sample: 75}
-var RegisterTorqueCurrentCommand = RegisterUInt16{Address: 2752, Sample: 0}
-var RegisterTorqueCurrentFeedback = RegisterUInt16{Address: 2753, Sample: 65529}
+	RegisterBatteryVoltage        = RegisterFloat16{Address: 2749, Precision: Single, Sample: 67.63736264}
+	RegisterWeakenCurrentCommand  = RegisterUInt16{Address: 2750, Sample: 0}
+	RegisterWeakenCurrentFeedback = RegisterUInt16{Address: 2751, Sample: 75}
+	RegisterTorqueCurrentCommand  = RegisterUInt16{Address: 2752, Sample: 0}
+	RegisterTorqueCurrentFeedback = RegisterUInt16{Address: 2753, Sample: 65529}
 
-// var RegisterControllerTemperature = RegisterUInt16{Address: 2754, Type: Int16, Sample: 25} // ** there are two controller temp -- which is correct according to the mqcon windows software?
-var RegisterMotorTemperature = RegisterUInt16{Address: 2755, Sample: 130}
-var RegisterMotorAngle = RegisterUInt16{Address: 2756, Sample: 22118}
-var RegisterMotorSpeed = RegisterUInt16{Address: 2757, Sample: 0}
-var RegisterHallStatus = RegisterUInt16{Address: 2758, Sample: 2}
+	// RegisterControllerTemperature = RegisterFloat16{Address: 2754, Precision: Single, Sample: 25.67} // ** there are two controller temp -- which is correct according to the mqcon windows software?
+	// RegisterControllerTemperature = RegisterUInt16{Address: 2754, Sample: 25} // ** there are two controller temp -- which is correct according to the mqcon windows software?
+	RegisterMotorTemperature = RegisterUInt16{Address: 2755, Sample: 130}
+	RegisterMotorAngle       = RegisterUInt16{Address: 2756, Sample: 22118}
+	RegisterMotorSpeed       = RegisterUInt16{Address: 2757, Sample: 0}
+	RegisterHallStatus       = RegisterUInt16{Address: 2758, Sample: 2}
 
-var RegisterThrottleVoltage = RegisterFloat16{Address: 2759, Precision: Double, Sample: 0.128}
-var RegisterMOSFETStatus = RegisterUInt16{Address: 2760, Sample: 426}
-var RegisterInitial = RegisterUInt16{Address: 4039, Sample: 13345}
+	RegisterThrottleVoltage = RegisterFloat16{Address: 2759, Precision: Double, Sample: 0.128}
+	RegisterMOSFETStatus    = RegisterUInt16{Address: 2760, Sample: 426}
+	RegisterInitial         = RegisterUInt16{Address: 4039, Sample: 13345}
 
 /* errors (where do we read this?)
 1 MOSFETFault
@@ -143,7 +146,8 @@ var RegisterInitial = RegisterUInt16{Address: 4039, Sample: 13345}
 ?? throttle?
 */
 
-/* unknowns
+/*
+	unknowns
 
 2555 value: 51278
 2556 value: 30 limit DC current?
@@ -245,3 +249,4 @@ var RegisterInitial = RegisterUInt16{Address: 4039, Sample: 13345}
 
 4048 value: 0
 */
+)

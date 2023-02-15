@@ -1,26 +1,32 @@
 linters:
   enable-all: true
   disable:
-  - cyclop  # noisy
-  - mnd  # noisy
-  - nlreturn  # noisy
-  - varnamelen  # noisy
-  - wsl  # noisy
-  - maligned  # archived by owner
-  - golint  # archived by owner
-  - interfacer  # archived by owner
-  - scopelint  # archived by owner
-  - bodyclose  # not yet supported in Go1.18
-  - contextcheck  # not yet supported in Go1.18
-  - gosimple  # not yet supported in Go1.18
-  - nilerr  # not yet supported in Go1.18
-  - noctx  # not yet supported in Go1.18
-  - rowserrcheck  # not yet supported in Go1.18
-  - sqlclosecheck  # not yet supported in Go1.18
-  - staticcheck  # not yet supported in Go1.18
-  - structcheck  # not yet supported in Go1.18
-  - stylecheck  # not yet supported in Go1.18
-  - tparallel  # not yet supported in Go1.18
-  - unparam  # not yet supported in Go1.18
-  - wastedassign  # not yet supported in Go1.18
-  - unused  # not yet supported in Go1.18
+  # Noisy things that aren't useful.
+  - cyclop
+  - exhaustivestruct
+  - exhaustruct
+  - funlen
+  - gomnd
+  - nlreturn
+  - varnamelen
+  - wsl
+
+  # Archived by owner.
+
+  # Not yet supported in Go 1.18.
+
+linters-settings:
+  gomoddirectives:
+    # Allow local `replace` directives.
+    # Default: false
+    replace-local: true
+
+  exhaustive:
+    # Presence of "default" case in switch statements satisfies exhaustiveness,
+    # even if all enum members are not listed.
+    # Default: false
+    default-signifies-exhaustive: true
+
+run:
+  skip-dirs:
+    - dupe

@@ -55,7 +55,7 @@ func (ss *SabvotonSerial) Run(ctx context.Context) error {
 		URL:      fmt.Sprintf("rtu://%s", ss.DevicePath),
 		Speed:    19200,
 		DataBits: 8,
-		Parity:   modbus.PARITY_ODD,
+		Parity:   modbus.PARITY_ODD, //nolint:nosnakecase
 		StopBits: 1,
 		Timeout:  300 * time.Millisecond,
 	})
@@ -91,9 +91,7 @@ func (ss *SabvotonSerial) Run(ctx context.Context) error {
 
 	// TODO: if we didn't get nil for the last error, keep trying to reconnect (and flag it as an error on the model)
 
-	for {
-		// TODO: if context is done, exit
-
+	for ctx.Err() == nil {
 		controllerTemperature := ss.ReadFloat(RegisterControllerTemperature, math.NaN())
 		model.LockNStore(m, &m.ControllerTemperature, controllerTemperature)
 
@@ -113,7 +111,7 @@ func (ss *SabvotonSerial) Run(ctx context.Context) error {
 		log.Printf("controllerTemperature=%v systemStatus=%v motorSpeed=%v mosfetStatus=%v batteryVoltage=%v", controllerTemperature, systemStatus, motorSpeed, mosfetStatus, batteryVoltage)
 	}
 
-	return nil
+	return ctx.Err()
 }
 
 func (ss *SabvotonSerial) ReadFloat(reg RegisterFloat16, errValue float64) float64 {

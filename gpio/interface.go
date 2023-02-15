@@ -1,6 +1,8 @@
 package gpio
 
-type GPIOData struct {
+import "context"
+
+type State struct {
 	LeftBlinker  bool
 	RightBlinker bool
 	Headlights   bool
@@ -8,5 +10,5 @@ type GPIOData struct {
 }
 
 type GPIO interface {
-	Run()
+	Run(ctx context.Context)
 }

@@ -22,12 +22,11 @@ func parseFloat(s string) float64 {
 	f, err := strconv.ParseFloat(s, 32)
 	if err != nil {
 		return math.NaN()
-	} else {
-		return f
 	}
+	return f
 }
 
-func (ca *CycleAnalyst3Mock) Run() error {
+func (ca *CycleAnalyst3Mock) Run(ctx context.Context) error {
 	data, err := os.ReadFile(ca.File)
 	if err != nil {
 		return fmt.Errorf("ReadFile: %w", err)
@@ -35,10 +34,10 @@ func (ca *CycleAnalyst3Mock) Run() error {
 
 	lines := strings.Split(string(data), "\n")
 
-	publishInterval := time.Duration(100 * time.Millisecond)
+	publishInterval := 100 * time.Millisecond
 	nextPublish := time.Now()
 
-	for { // repeatedly publish the same data in a loop
+	for ctx.Err() != nil { // repeatedly publish the same data in a loop
 		for _, row := range lines {
 			// TODO: exit loop when cancel context is Done
 

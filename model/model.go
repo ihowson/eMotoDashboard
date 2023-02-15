@@ -49,7 +49,7 @@ func LockNStore[T any](m *Model, dest *T, newValue T) {
 	_ = oldValue
 	// if oldValue != newValue {
 	// push to chan to notify of change
-// }
+	// }
 }
 
 // There are no accessor functions. In exchange for that convenience, all reads
