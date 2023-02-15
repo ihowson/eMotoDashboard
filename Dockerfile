@@ -23,5 +23,5 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends \
     libxinerama-dev:armhf \
     && rm -rf /var/lib/apt/lists/*
 
-# install Go 1.18
-RUN curl -o /tmp/go.tar.gz -L https://go.dev/dl/go1.18.2.linux-amd64.tar.gz && tar -C /usr/local -xzf /tmp/go.tar.gz && rm -f /tmp/go.tar.gz
+# install Go 1.20
+RUN curl -o /tmp/go.tar.gz -L https://go.dev/dl/go1.20.linux-amd64.tar.gz && tar -C /usr/local -xzf /tmp/go.tar.gz && rm -f /tmp/go.tar.gz
