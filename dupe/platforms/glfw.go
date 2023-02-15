@@ -59,7 +59,7 @@ func NewGLFW(io imgui.IO, clientAPI GLFWClientAPI) (*GLFW, error) {
 		return nil, fmt.Errorf("failed to create window: %w", err)
 	}
 	window.MakeContextCurrent()
-	glfw.SwapInterval(1)
+	glfw.SwapInterval(2)
 
 	platform := &GLFW{
 		imguiIO: io,
