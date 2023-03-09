@@ -17,7 +17,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"math"
 	"time"
 
 	"github.com/ihowson/eMotoDashboard/model"
@@ -87,28 +86,25 @@ func (ss *SabvotonSerial) Run(ctx context.Context) error {
 	time.Sleep(50 * time.Millisecond)
 
 	ss.modbus = client
-	m := ss.Model
+	// m := ss.Model
 
 	// TODO: if we didn't get nil for the last error, keep trying to reconnect (and flag it as an error on the model)
 
 	for ctx.Err() == nil {
-		controllerTemperature := ss.ReadFloat(RegisterControllerTemperature, math.NaN())
-		model.LockNStore(m, &m.ControllerTemperatureCelcius, controllerTemperature)
+		time.Sleep(time.Second)
+		// No idea if this is correct. Never seen it vary from 30.
+		// controllerTemperature := ss.ReadFloat(RegisterControllerTemperature, math.NaN())
+		// model.LockNStore(m, &m.ControllerTemperatureCelcius, controllerTemperature)
 
-		systemStatus := ss.ReadUInt16(RegisterSystemStatus, 0)
-		// TODO: consider nullable types instead of defaults https://github.com/emvi/null
-		ss.Model.Debugs.Store("SabvotonSystemStatus", systemStatus)
+		// This is the 23/13 code that changes when you go to flux weakening. You might want to display it as text on the dash especially if it's anomalous.
+		// systemStatus := ss.ReadUInt16(RegisterSystemStatus, 0)
+		// ss.Model.Debugs.Store("SabvotonSystemStatus", systemStatus)
 
-		motorSpeed := ss.ReadUInt16(RegisterMotorSpeed, 0xffff)
-		ss.Model.Debugs.Store("SabvotonMotorSpeed", motorSpeed)
+		// This is within 1V of the CAv3
+		// batteryVoltage := ss.ReadFloat(RegisterBatteryVoltage, math.NaN())
+		// ss.Model.Debugs.Store("SabvotonBatteryVoltage", batteryVoltage)
 
-		mosfetStatus := ss.ReadUInt16(RegisterMOSFETStatus, 0xffff)
-		ss.Model.Debugs.Store("SabvotonMOSFETStatus", mosfetStatus)
-
-		batteryVoltage := ss.ReadFloat(RegisterBatteryVoltage, math.NaN())
-		ss.Model.Debugs.Store("SabvotonBatteryVoltage", batteryVoltage)
-
-		log.Printf("controllerTemperature=%v systemStatus=%v motorSpeed=%v mosfetStatus=%v batteryVoltage=%v", controllerTemperature, systemStatus, motorSpeed, mosfetStatus, batteryVoltage)
+		// log.Printf("controllerTemperature=%v systemStatus=%v motorSpeed=%v mosfetStatus=%v batteryVoltage=%v", controllerTemperature, systemStatus, motorSpeed, mosfetStatus, batteryVoltage)
 	}
 
 	return ctx.Err()
