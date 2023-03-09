@@ -2,84 +2,20 @@ package gui
 
 import (
 	"fmt"
+	"log"
 	"math"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	imgui "github.com/inkyblackness/imgui-go/v4"
-
-	"github.com/ihowson/eMotoDashboard/m/v2/dupe/platforms"
-	"github.com/ihowson/eMotoDashboard/m/v2/dupe/renderers"
-	"github.com/ihowson/eMotoDashboard/m/v2/model"
 )
 
-type MotoGUI struct {
-	Model *model.Model
+func (gui *MotoGUI) drawRunning() {
+	DPMSForceOn()
 
-	fontDINEng32    imgui.Font
-	fontDINMittel32 imgui.Font
-	// fontAwesome32   imgui.Font
-	fontSpeed imgui.Font
-
-	clearColor [3]float32
-
-	width  float32
-	height float32
-}
-
-func (gui *MotoGUI) Run() error {
-	// TODO: pull this from platform
-	gui.width = 800.
-	gui.height = 480.
-
-	context := imgui.CreateContext(nil)
-	defer context.Destroy()
-
-	io := imgui.CurrentIO()
-	gui.loadFonts(io)
-
-	platform, err := platforms.NewGLFW(io, platforms.GLFWClientAPIOpenGL2)
-	if err != nil {
-		return fmt.Errorf("NewGLFW: %w", err)
-	}
-	defer platform.Dispose()
-
-	renderer, err := renderers.NewOpenGL2(io)
-	if err != nil {
-		return fmt.Errorf("NewOpenGL2: %w", err)
-	}
-	defer renderer.Dispose()
-
-	gui.run(platform, renderer)
-
-	return nil
-}
-
-func (gui *MotoGUI) run(p Platform, r Renderer) {
-	gui.clearColor = [3]float32{0.0, 0.0, 0.0}
+	// FIXME: revamp
 	m := gui.Model
-
-	for !p.ShouldStop() {
-		p.ProcessEvents()
-
-		// Signal start of a new frame
-		p.NewFrame()
-		imgui.NewFrame()
-
-		gui.drawFrame(p, r, m)
-
-		// ds := [2]float32{800.0, 480.0} // force screen size on Mac
-		// r.Render(ds, p.FramebufferSize(), imgui.RenderedDrawData())
-		r.Render(p.DisplaySize(), p.FramebufferSize(), imgui.RenderedDrawData())
-		p.PostRender()
-	}
-}
-
-func (gui *MotoGUI) drawFrame(p Platform, r Renderer, m *model.Model) {
 	m.Lock.Lock()
 	defer m.Lock.Unlock()
-
-	// log.Printf(time.Now().String())
 
 	/*
 		top-right clock, date
@@ -121,10 +57,6 @@ func (gui *MotoGUI) drawFrame(p Platform, r Renderer, m *model.Model) {
 		show the error flags reported by CA
 	*/
 
-	imgui.SetNextWindowPos(imgui.Vec2{X: 0, Y: 0})
-	imgui.SetNextWindowSize(imgui.Vec2{X: gui.width, Y: gui.height})
-	imgui.BeginV("Dashboard", nil, imgui.WindowFlagsNoBackground|imgui.WindowFlagsNoDecoration)
-
 	// if imgui.Button("Button") { // Buttons return true when clicked (most widgets return true when edited/activated)
 	// 	counter++
 	// }
@@ -134,20 +66,23 @@ func (gui *MotoGUI) drawFrame(p Platform, r Renderer, m *model.Model) {
 	// STATUS ROW
 	// speed graph & clock
 
-	// RPM graph
-	// actually speed, since we have no gears
-	// TODO: want this to change color depending on speed/RPM
+	// Power graph.
+	// On previous bikes this was kind of obvious; power was proportional to
+	// throttle, and I know throttle from my hand position. It was also kind
+	// of on/off, since there was little reason NOT to be at full throttle.
+	// This bike is powerful enough that you will sit midrange for much of the
+	// time.
 	imgui.SetCursorPos(imgui.Vec2{
 		X: 0.0,
 		Y: 0.0,
 	})
 	imgui.ProgressBarV(
-		float32(m.SpeedMph/70.0),
+		float32(m.BatteryAmps/150.0),
 		imgui.Vec2{
 			X: 800.0,
-			Y: 80.0,
+			Y: 60.0,
 		},
-		"",
+		fmt.Sprintf("%0.1fkW", m.BatteryVoltageCA*m.BatteryAmps/1000.0),
 	)
 
 	// TODO: status icons would go here
@@ -159,7 +94,7 @@ func (gui *MotoGUI) drawFrame(p Platform, r Renderer, m *model.Model) {
 	// imgui.SetCursorScreenPos(imgui.Vec2{
 	imgui.SetCursorPos(imgui.Vec2{
 		X: 800.0 - clockWidth - 5.0,
-		Y: 5.0,
+		Y: 65.0,
 	})
 	imgui.Text(clockText)
 	imgui.PopFont()
@@ -181,6 +116,7 @@ func (gui *MotoGUI) drawFrame(p Platform, r Renderer, m *model.Model) {
 	}
 
 	// SPEEDO
+	// TODO: push this as high as possible to help ergonomics
 	imgui.SetCursorPos(imgui.Vec2{
 		X: 240.0,
 		Y: 120.0,
@@ -207,7 +143,7 @@ func (gui *MotoGUI) drawFrame(p Platform, r Renderer, m *model.Model) {
 
 	// battery bar
 	imgui.PushFont(gui.fontDINEng32)
-	battWidth := float32(80.)
+	// battWidth := float32(80.)
 	battHeight := float32(gui.height)
 
 	// might as well use all of the space available
@@ -221,44 +157,31 @@ func (gui *MotoGUI) drawFrame(p Platform, r Renderer, m *model.Model) {
 	VerticalProgressBar(
 		float32(fakeStateOfCharge),
 		imgui.Vec2{
-			X: battWidth,
+			X: 80.0,
 			Y: battHeight - 180.0,
 		},
-		fmt.Sprintf("%2d%%", int(math.Round(fakeStateOfCharge*100.0))),
+		fmt.Sprintf("bat\n%2d%%", int(math.Round(fakeStateOfCharge*100.0))),
 	)
 
-	// temperature gaug
-	// might as well use all of the space available
+	// temperature gauges
 	imgui.SetCursorPos(imgui.Vec2{
-		X: 720.0,
+		X: 700.0,
 		Y: 180.0,
 	})
-
 	VerticalProgressBar(
 		float32(m.MotorTemperatureCelcius/100.0),
 		imgui.Vec2{
-			X: battWidth,
+			X: 80.0,
 			Y: battHeight - 180.0,
 		},
-		fmt.Sprintf("%d C", int(math.Round(m.MotorTemperatureCelcius))),
+		fmt.Sprintf("mtr\n%d C", int(math.Round(m.MotorTemperatureCelcius))),
 	)
 
 	imgui.SetCursorPos(imgui.Vec2{
-		X: 160.0,
-		Y: 160.0,
-	})
-	// imgui.Text(fmt.Sprintf("BatteryAmps: %0.1f", m.BatteryAmps))
-	// imgui.SetCursorPos(imgui.Vec2{
-	// 	X: 160.0,
-	// 	Y: 200.0,
-	// })
-	// imgui.Text(fmt.Sprintf("BatteryAmpHoursConsumed: %0.1f", m.BatteryAmpHoursConsumed))
-
-	imgui.SetCursorPos(imgui.Vec2{
-		X: 480.0,
+		X: 520.0,
 		Y: 440.0,
 	})
-	imgui.Text(fmt.Sprintf("Distance: %0.1f", m.Distance))
+	imgui.Text(fmt.Sprintf("Trip: %0.1fmi", m.Distance))
 
 	// imgui.SetCursorPos(imgui.Vec2{
 	// 	X: 160.0,
@@ -267,37 +190,53 @@ func (gui *MotoGUI) drawFrame(p Platform, r Renderer, m *model.Model) {
 	// imgui.Text(fmt.Sprintf("Odometer: %0.0f", m.Odometer))
 
 	imgui.SetCursorPos(imgui.Vec2{
-		X: 160.0,
+		X: 120.0,
 		Y: 440.0,
 	})
 	imgui.Text(fmt.Sprintf("BatteryVolts: %0.1f", m.BatteryVoltageCA))
 
-	imgui.SetCursorPos(imgui.Vec2{
-		X: 160.0,
-		Y: 10.0,
-	})
-	imgui.Text(fmt.Sprintf("Power: %0.2fkW", m.BatteryVoltageCA*m.BatteryAmps/1000.0))
-	imgui.PopFont()
-
-	imgui.PushFont(imgui.DefaultFont)
-	imgui.SetCursorPos(imgui.Vec2{
-		X: 160.0,
-		Y: 240.0,
-	})
-	imgui.Text(fmt.Sprintf("Debugs: %s", spew.Sdump(m.Debugs)))
-	imgui.PopFont()
+	// TODO: report the minimum cell voltage here
+	// - would like to see minimum battery voltage on the emoto on the main dashboard so you know if you're going to get a surprise low voltage; sparkline chart might be nice too
 
 	imgui.SetCursorPos(imgui.Vec2{
-		X: 160.0,
-		Y: 360.0,
-	})
-	imgui.Text(fmt.Sprintf("Ctrlr Temp: %v", m.ControllerTemperature))
-
-	imgui.SetCursorPos(imgui.Vec2{
-		X: 160.0,
+		X: 120.0,
 		Y: 400.0,
 	})
 	imgui.Text(fmt.Sprintf("Faults: %v", m.Faults))
+
+	// Print Debugs
+	// imgui.PushFont(imgui.DefaultFont)
+
+	imgui.SetCursorPos(imgui.Vec2{
+		X: 480.0,
+		Y: 160.0,
+	})
+	imgui.Text("DEBUGS")
+	imgui.SetCursorPos(imgui.Vec2{
+		X: 480.0,
+		Y: 180.0,
+	})
+	keys := SortedKeys(m.Debugs)
+	y := float32(220.0)
+	imgui.PushFont(imgui.DefaultFont)
+	for _, key := range keys {
+		log.Printf("try key=%s", key)
+		value, ok := m.Debugs.Load(key)
+		// log.Printf("Load key=%s, ok=%v value=%v", key, ok, value)
+		if !ok {
+			continue
+		}
+		// valueStr, ok := value.(string)
+		// if !ok {
+		// 	continue
+		// }
+		valueStr := fmt.Sprintf("%v", value)
+		log.Printf("key=%s value=%s", key, valueStr)
+		imgui.SetCursorPos(imgui.Vec2{X: 480.0, Y: y})
+		imgui.Text(fmt.Sprintf("%s: %s", key, valueStr))
+		y += 20.0
+	}
+	imgui.PopFont()
 
 	// imgui.PushFont(gui.fontAwesome32)
 	// imgui.Text("             ")
@@ -315,15 +254,9 @@ func (gui *MotoGUI) drawFrame(p Platform, r Renderer, m *model.Model) {
 	// microchip (for controller temp?), plug, plug-circle-bolt,
 	// plug-circle-exclamation, sliders, toggle-off, toggle-on, triangle-exclamation, motorcycle
 	imgui.PopFont()
+	imgui.PopFont()
 
 	imgui.End()
-
-	// Rendering
-	imgui.Render() // This call only creates the draw data list. Actual rendering to framebuffer is done below.
-
-	r.PreRender(gui.clearColor)
-	// A this point, the application could perform its own rendering...
-	// app.RenderScene()
 
 	// TODO: insert skia/svg/whatever draw layer here
 

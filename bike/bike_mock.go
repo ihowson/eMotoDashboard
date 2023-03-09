@@ -16,5 +16,5 @@ func Build() (*model.Model, *Bike) {
 	}
 	go ca.Run()
 
-	return &m
+	return &m, nil // FIXME: bike not implemented
 }

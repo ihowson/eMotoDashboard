@@ -3,7 +3,6 @@ module github.com/ihowson/eMotoDashboard
 go 1.18
 
 require (
-	github.com/davecgh/go-spew v1.1.1
 	github.com/go-gl/glfw v0.0.0-20221017161538-93cebf72946b
 	github.com/inkyblackness/imgui-go/v4 v4.7.0
 	github.com/simonvetter/modbus v1.6.0

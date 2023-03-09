@@ -31,7 +31,13 @@ func VerticalProgressBar(percent float32, size imgui.Vec2, label string) {
 	}
 
 	// center label in bar (ish) // FIXME: horizontal spacing is wrong
-	imgui.SetCursorPos(max.Minus(bgMin).Times(0.5).Plus(bgMin))
+	textWidth := imgui.CalcTextSize(label, false, 0.0)
+	midX := bgMin.X + (size.X / 2)
+	startX := midX - textWidth.X/2
+	imgui.SetCursorPos(imgui.Vec2{
+		X: startX,
+		Y: bgMin.Y + size.Y/2,
+	})
 
 	// TODO: use imgui.PushWrapPosV to center align
 	imgui.Text(label)
