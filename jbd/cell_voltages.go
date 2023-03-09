@@ -20,7 +20,9 @@ func (jbd *JBDBluetooth) LatestCellVoltages() CellVoltages {
 }
 
 func (jbd *JBDBluetooth) ReadCellVoltages(ctx context.Context) (CellVoltages, error) {
-	cv := CellVoltages{}
+	cv := CellVoltages{
+		Time: time.Now(),
+	}
 
 	req := readRequest(RegisterCellVoltages, []byte{})
 	resp, err := jbd.RawRequest(ctx, req)
