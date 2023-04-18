@@ -59,7 +59,6 @@ func Build() (*model.Model, *Bike) {
 	}()
 
 	bms := &jbd.JBDBluetooth{
-		// Address: "70:3e:97:08:05:4b",
 		Address: "70:3E:97:08:05:4B",
 		Model:   m,
 	}

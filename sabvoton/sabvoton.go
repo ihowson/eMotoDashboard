@@ -82,12 +82,10 @@ func (ss *SabvotonSerial) Run(ctx context.Context) error {
 	time.Sleep(50 * time.Millisecond)
 
 	ss.modbus = client
-	// m := ss.Model
 
 	// TODO: if we didn't get nil for the last error, keep trying to reconnect (and flag it as an error on the model)
 
 	for ctx.Err() == nil {
-		time.Sleep(time.Second)
 		// No idea if this is correct. Never seen it vary from 30.
 		// controllerTemperature := ss.ReadFloat(RegisterControllerTemperature, math.NaN())
 		// model.LockNStore(m, &m.ControllerTemperatureCelcius, controllerTemperature)

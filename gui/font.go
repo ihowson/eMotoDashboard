@@ -16,10 +16,9 @@ func (gui *MotoGUI) loadFonts(io imgui.IO) {
 	// Reduces texture size and quality. 2 is better.
 	fontConfig.SetOversampleH(1)
 	fontConfig.SetOversampleV(1)
-	// config.SetGlyphMinAdvanceX(24.0)
-	// config.SetGlyphMaxAdvanceX(24.0)
 	speedGlyphRangeBuilder := imgui.GlyphRangesBuilder{}
 	speedGlyphRangeBuilder.Add('0', '9')
+	speedGlyphRangeBuilder.Add('%', '%')
 	speedGlyphRange := speedGlyphRangeBuilder.Build()
 	// defer speedGlyphRange.Free()
 	gui.fontSpeed = io.Fonts().AddFontFromFileTTFV("assets/DINMittelschriftStd.otf", 360, fontConfig, speedGlyphRange.GlyphRanges)

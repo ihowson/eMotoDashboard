@@ -2,7 +2,6 @@ package gui
 
 import (
 	"fmt"
-	"log"
 	"math"
 	"time"
 
@@ -18,19 +17,14 @@ func (gui *MotoGUI) drawRunning() {
 	defer m.Lock.Unlock()
 
 	/*
-		top-right clock, date
 		wifi symbol
 
 		outside temperature
 
-		big speedo in the middle
-			small mph to its right
-			- big circle guage around it from min to max speed like https://www.google.com/imgres?imgurl=https%3A%2F%2Fthumbor.forbes.com%2Fthumbor%2Ftrim%2F0x0%3A4000x2667%2Ffit-in%2F711x474%2Fsmart%2Fhttps%3A%2F%2Fspecials-images.forbesimg.com%2Fimageserve%2F5f488eecf326a401e79b743e%2FZero-SR-S-Electric-Motorcycle%2F0x0.jpg&imgrefurl=https%3A%2F%2Fwww.forbes.com%2Fsites%2Fbillroberson%2F2020%2F08%2F28%2Flong-term-ride-review-zeros-srs-electric-motorcycle-raises-the-bar-again%2F&tbnid=yBlBXHRIaz6XMM&vet=10CAMQxiAoAGoXChMIsNvgo9_k9wIVAAAAAB0AAAAAEBw..i&docid=plXQ59Hj1tpwiM&w=711&h=474&itg=1&q=electric%20motorcycle%20dashboard&ved=0CAMQxiAoAGoXChMIsNvgo9_k9wIVAAAAAB0AAAAAEBw
-				- color can reflect something (% of max speed? temperature?)
+		- big circle gauge around speedo from min to max speed like https://www.google.com/imgres?imgurl=https%3A%2F%2Fthumbor.forbes.com%2Fthumbor%2Ftrim%2F0x0%3A4000x2667%2Ffit-in%2F711x474%2Fsmart%2Fhttps%3A%2F%2Fspecials-images.forbesimg.com%2Fimageserve%2F5f488eecf326a401e79b743e%2FZero-SR-S-Electric-Motorcycle%2F0x0.jpg&imgrefurl=https%3A%2F%2Fwww.forbes.com%2Fsites%2Fbillroberson%2F2020%2F08%2F28%2Flong-term-ride-review-zeros-srs-electric-motorcycle-raises-the-bar-again%2F&tbnid=yBlBXHRIaz6XMM&vet=10CAMQxiAoAGoXChMIsNvgo9_k9wIVAAAAAB0AAAAAEBw..i&docid=plXQ59Hj1tpwiM&w=711&h=474&itg=1&q=electric%20motorcycle%20dashboard&ved=0CAMQxiAoAGoXChMIsNvgo9_k9wIVAAAAAB0AAAAAEBw
+			- color can reflect something (% of max speed? temperature?)
 
 		battery voltage graph on left with colors
-		actual voltage
-		% SOC
 		est. range from last 10 miles
 		est. range since start of charge
 
@@ -39,27 +33,13 @@ func (gui *MotoGUI) drawRunning() {
 
 		motor temperature graph (scaled extenral temp to max temp)
 
-		??
-			current draw
-			watts draw
-				and a big pretty graph for that
-			an rpm/speed graph might make more sense
-
 		signal for left turn, right turn, highbeam, lights on
 		any error indications
 
 		flash battery when there's a range warning
 
-		keep the background perfectly black, try to just have numbers floating on there
-
-		when preset is 1, show N
-		when preset is 2 or 3, show 'ECO' or 'SPORT'
 		show the error flags reported by CA
 	*/
-
-	// if imgui.Button("Button") { // Buttons return true when clicked (most widgets return true when edited/activated)
-	// 	counter++
-	// }
 
 	imgui.PushFont(gui.fontDINEng32)
 
@@ -91,7 +71,6 @@ func (gui *MotoGUI) drawRunning() {
 	now := time.Now()
 	clockText := fmt.Sprintf("%02d:%02d", now.Hour(), now.Minute())
 	clockWidth := imgui.CalcTextSize(clockText, false, -1).X
-	// imgui.SetCursorScreenPos(imgui.Vec2{
 	imgui.SetCursorPos(imgui.Vec2{
 		X: 800.0 - clockWidth - 5.0,
 		Y: 65.0,
@@ -123,7 +102,6 @@ func (gui *MotoGUI) drawRunning() {
 	})
 	imgui.PushStyleColor(col, color)
 	imgui.PushFont(gui.fontSpeed)
-	// speed := m.LockNLoadFloat64(&m.Speed)
 	intSpeed := int(math.Round(m.SpeedMph)) // TODO: use LockNLoad or an atomic read here
 
 	// TODO: want this right-aligned. seems to 9-pad it with %2d
@@ -205,8 +183,6 @@ func (gui *MotoGUI) drawRunning() {
 	imgui.Text(fmt.Sprintf("Faults: %v", m.Faults))
 
 	// Print Debugs
-	// imgui.PushFont(imgui.DefaultFont)
-
 	imgui.SetCursorPos(imgui.Vec2{
 		X: 480.0,
 		Y: 160.0,
@@ -220,18 +196,11 @@ func (gui *MotoGUI) drawRunning() {
 	y := float32(220.0)
 	imgui.PushFont(imgui.DefaultFont)
 	for _, key := range keys {
-		log.Printf("try key=%s", key)
 		value, ok := m.Debugs.Load(key)
-		// log.Printf("Load key=%s, ok=%v value=%v", key, ok, value)
 		if !ok {
 			continue
 		}
-		// valueStr, ok := value.(string)
-		// if !ok {
-		// 	continue
-		// }
 		valueStr := fmt.Sprintf("%v", value)
-		log.Printf("key=%s value=%s", key, valueStr)
 		imgui.SetCursorPos(imgui.Vec2{X: 480.0, Y: y})
 		imgui.Text(fmt.Sprintf("%s: %s", key, valueStr))
 		y += 20.0
@@ -257,11 +226,4 @@ func (gui *MotoGUI) drawRunning() {
 	imgui.PopFont()
 
 	imgui.End()
-
-	// TODO: insert skia/svg/whatever draw layer here
-
-	// FIXME: maybe you can lock the size here?
-
-	// FIXME: add a tap zone to go to Debugging or the other pages
-
 }
