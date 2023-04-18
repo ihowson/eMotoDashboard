@@ -65,10 +65,6 @@ func (ss *SabvotonSerial) Run(ctx context.Context) error {
 	err = client.Open()
 	if err != nil {
 		return fmt.Errorf("modbus.Open: %w", err)
-		// FIXME: multiple Open() attempts can be made on the same client until
-		// the connection succeeds (i.e. err == nil), calling the constructor again
-		// is unnecessary.
-		// likewise, a client can be opened and closed as many times as needed.
 	}
 	defer client.Close()
 

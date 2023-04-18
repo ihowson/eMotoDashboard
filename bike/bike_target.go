@@ -4,6 +4,7 @@ package bike
 
 import (
 	"context"
+	"errors"
 	"log"
 	"time"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/ihowson/eMotoDashboard/jbd"
 	"github.com/ihowson/eMotoDashboard/model"
 	"github.com/ihowson/eMotoDashboard/sabvoton"
+	"github.com/simonvetter/modbus"
 )
 
 type Bike struct {
@@ -48,10 +50,11 @@ func Build() (*model.Model, *Bike) {
 	}
 	go func() {
 		for {
-			log.Printf("SabvotonSerial Run")
 			err := sabvoton.Run(ctx)
-			log.Printf("SabvotonSerial exited: %v", err)
-			time.Sleep(500 * time.Millisecond)
+			if !errors.Is(err, modbus.ErrRequestTimedOut) {
+				log.Printf("SabvotonSerial exited: %v", err)
+			}
+			time.Sleep(250 * time.Millisecond)
 		}
 	}()
 
