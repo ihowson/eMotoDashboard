@@ -12,6 +12,7 @@ func (gui *MotoGUI) drawCharging() {
 	bi := bike.BMS.LatestBasicInfo()
 	biValid := bi.Time.IsZero() || time.Since(bi.Time) < 5*time.Second
 
+	// FIXME: use atomics
 	// gui.lock.Lock()
 	// defer gui.lock.Unlock()
 
@@ -19,6 +20,25 @@ func (gui *MotoGUI) drawCharging() {
 		battery voltage graph on left with colors
 		actual voltage
 	*/
+
+	col := imgui.StyleColorID(imgui.StyleColorText)
+	socColor := imgui.Vec4{
+		X: 0.5,
+		Y: 1.0,
+		Z: 0.5,
+		W: 1.0,
+	}
+
+	// SoC
+	imgui.SetCursorPos(imgui.Vec2{
+		X: 180.0,
+		Y: 40.0,
+	})
+	imgui.PushStyleColor(col, socColor)
+	imgui.PushFont(gui.fontSpeed)
+	imgui.Text(fmt.Sprintf("%2d%%", bi.StateOfChargePercent))
+	imgui.PopFont()
+	imgui.PopStyleColor()
 
 	imgui.PushFont(gui.fontDINEng32)
 
@@ -31,7 +51,7 @@ func (gui *MotoGUI) drawCharging() {
 	// imgui.SetCursorScreenPos(imgui.Vec2{
 	imgui.SetCursorPos(imgui.Vec2{
 		X: 800.0 - clockWidth - 5.0,
-		Y: 65.0,
+		Y: 5.0,
 	})
 	imgui.Text(clockText)
 	imgui.PopFont()
@@ -43,7 +63,6 @@ func (gui *MotoGUI) drawCharging() {
 	miles := bi.PackCapacityAmpHours * 72.0 / wattHoursPerMile
 
 	if biValid {
-		col := imgui.StyleColorID(imgui.StyleColorText)
 		green := imgui.Vec4{
 			X: 0.0,
 			Y: 1.0,

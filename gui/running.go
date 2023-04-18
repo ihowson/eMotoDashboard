@@ -16,6 +16,8 @@ func (gui *MotoGUI) drawRunning() {
 	m.Lock.Lock()
 	defer m.Lock.Unlock()
 
+	b := gui.Bike
+
 	/*
 		wifi symbol
 
@@ -131,14 +133,14 @@ func (gui *MotoGUI) drawRunning() {
 	})
 
 	// TODO: you should leave the X and Y width at 0.0f to have it automatically fit in the column
-	fakeStateOfCharge := 1.0 - (m.BatteryAmpHoursConsumed / 16.0)
+	basicInfo := b.BMS.LatestBasicInfo()
 	VerticalProgressBar(
-		float32(fakeStateOfCharge),
+		float32(basicInfo.StateOfChargePercent)/100.0,
 		imgui.Vec2{
 			X: 80.0,
 			Y: battHeight - 180.0,
 		},
-		fmt.Sprintf("bat\n%2d%%", int(math.Round(fakeStateOfCharge*100.0))),
+		fmt.Sprintf("bat\n%2d%%", basicInfo.StateOfChargePercent),
 	)
 
 	// temperature gauges
