@@ -9,6 +9,9 @@ Unlike most, it has a waterproof mini-DIN connector, not a mess of Molex
 connectors, and it doesn't have an input for the motor temperature sensor. The
 MQCON software fails to read the motor temperature. I've attempted to make this
 work based on slothorpe's documentation, but I haven't tested it.
+
+Lots of good technical discussion at
+https://www.elektroroller-forum.de/viewtopic.php?f=9&t=2671&start=370
 */
 
 package sabvoton
@@ -100,6 +103,21 @@ func (ss *SabvotonSerial) Run(ctx context.Context) error {
 	ss.modbus = client
 
 	// TODO: if we didn't get nil for the last error, keep trying to reconnect (and flag it as an error on the model)
+
+	// Dump and update the controller configuration.
+	log.Printf("SABVOTON CONFIG")
+	for _, conf := range DesiredConfig {
+		val := ss.ReadUInt16(conf.Register, 0)
+		log.Printf("%s: %d", conf.Name, val)
+
+		if conf.Value != val {
+			log.Printf("UPDATE %s to %d", conf.Name, conf.Value)
+			err := client.WriteRegister(conf.Register.Address, conf.Value)
+			if err != nil {
+				log.Printf("failed to update %s: %v", conf.Name, err)
+			}
+		}
+	}
 
 	for ctx.Err() == nil {
 		systemStatus := ss.ReadUInt16(RegisterSystemStatus, 0)

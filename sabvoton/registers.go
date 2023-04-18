@@ -30,15 +30,16 @@ type RegisterFloat16 struct {
 
 //nolint:gochecknoglobals
 var (
-	RegisterDCCurrentLimitVoltage          = RegisterUInt16{Address: 2548, Sample: 40}
-	RegisterLackVoltage                    = RegisterUInt16{Address: 2549, Sample: 40}
-	RegisterOverVoltage                    = RegisterUInt16{Address: 2550, Sample: 88}
-	RegisterRatedDCCurrent                 = RegisterUInt16{Address: 2551, Sample: 120}
-	RegisterMaxDCCurrent                   = RegisterUInt16{Address: 2552, Sample: 120}
-	RegisterMaxPhaseCurrent                = RegisterUInt16{Address: 2553, Sample: 350}
-	RegisterProtectedPhaseCurrent          = RegisterUInt16{Address: 2554, Sample: 450}
-	RegisterRatedPhaseCurrent              = RegisterUInt16{Address: 2559, Sample: 150}
-	RegisterControllerTemperature          = RegisterFloat16{Address: 2562, Precision: Single, Sample: 32.97} // TODO: update with sample from your controller . There are two controller temperature -- which one is correct? . This doesn't seem to be the right one.
+	RegisterDCCurrentLimitVoltage = RegisterUInt16{Address: 2548, Sample: 40}
+	RegisterLackVoltage           = RegisterUInt16{Address: 2549, Sample: 40}
+	RegisterOverVoltage           = RegisterUInt16{Address: 2550, Sample: 88}
+	RegisterRatedDCCurrent        = RegisterUInt16{Address: 2551, Sample: 120}
+	RegisterMaxDCCurrent          = RegisterUInt16{Address: 2552, Sample: 120}
+	RegisterMaxPhaseCurrent       = RegisterUInt16{Address: 2553, Sample: 350}
+	RegisterProtectedPhaseCurrent = RegisterUInt16{Address: 2554, Sample: 450}
+	RegisterRatedPhaseCurrent     = RegisterUInt16{Address: 2559, Sample: 150}
+	// On my controller, this always returns 32.97.
+	RegisterControllerTemperature2562      = RegisterFloat16{Address: 2562, Precision: Single, Sample: 32.97} // TODO: update with sample from your controller . There are two controller temperature -- which one is correct? . This doesn't seem to be the right one.
 	RegisterUnderworkTemperature           = RegisterUInt16{Address: 2568, Sample: 90}
 	RegisterReworkTemperature              = RegisterUInt16{Address: 2569, Sample: 80}
 	RegisterLimitedCurrentTemperature      = RegisterUInt16{Address: 2570, Sample: 70}
@@ -100,12 +101,12 @@ var (
 	RegisterTorqueCurrentCommand  = RegisterUInt16{Address: 2752, Sample: 0}
 	RegisterTorqueCurrentFeedback = RegisterUInt16{Address: 2753, Sample: 65529}
 
-	// RegisterControllerTemperature = RegisterFloat16{Address: 2754, Precision: Single, Sample: 25.67} // ** there are two controller temp -- which is correct according to the mqcon windows software?
-	// RegisterControllerTemperature = RegisterUInt16{Address: 2754, Sample: 25} // ** there are two controller temp -- which is correct according to the mqcon windows software?
-	RegisterMotorTemperature = RegisterUInt16{Address: 2755, Sample: 130}
-	RegisterMotorAngle       = RegisterUInt16{Address: 2756, Sample: 22118}
-	RegisterMotorSpeed       = RegisterUInt16{Address: 2757, Sample: 0}
-	RegisterHallStatus       = RegisterUInt16{Address: 2758, Sample: 2}
+	// On my controller, this always returns 25. This is what the MQCON Windows software reports.
+	RegisterControllerTemperature2754 = RegisterUInt16{Address: 2754, Sample: 25}
+	RegisterMotorTemperature          = RegisterUInt16{Address: 2755, Sample: 130}
+	RegisterMotorAngle                = RegisterUInt16{Address: 2756, Sample: 22118}
+	RegisterMotorSpeed                = RegisterUInt16{Address: 2757, Sample: 0}
+	RegisterHallStatus                = RegisterUInt16{Address: 2758, Sample: 2}
 
 	RegisterThrottleVoltage = RegisterFloat16{Address: 2759, Precision: Double, Sample: 0.128}
 	RegisterMOSFETStatus    = RegisterUInt16{Address: 2760, Sample: 426}
