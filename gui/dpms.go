@@ -3,31 +3,33 @@ package gui
 import (
 	"log"
 	"os/exec"
-	"strconv"
 )
 
 var _timeout int
 
+const (
+	ForceOn  = -1
+	ForceOff = -2
+)
+
 func DPMSForceOn() {
-	if 0 == _timeout {
+	if _timeout == ForceOn {
 		return
 	}
-	_timeout = 0
-	cmd := exec.Command("xset", "dpms", "force", "on")
+	_timeout = ForceOn
+	cmd := exec.Command("xset", "s", "off", "-dpms")
 	err := cmd.Run()
 	if err != nil {
 		log.Printf("Error setting DPMS timeout: %v", err)
 	}
 }
 
-func DPMSSetTimeout(seconds int) {
-	if seconds == _timeout {
+func DPMSForceOff() {
+	if _timeout == ForceOff {
 		return
 	}
-	_timeout = seconds
-
-	strTimeout := strconv.Itoa(seconds)
-	cmd := exec.Command("xset", "s", strTimeout, strTimeout)
+	_timeout = ForceOff
+	cmd := exec.Command("xset", "dpms", "force", "off")
 	err := cmd.Run()
 	if err != nil {
 		log.Printf("Error setting DPMS timeout: %v", err)

@@ -89,7 +89,7 @@ func (gui *MotoGUI) drawCharging() {
 			imgui.Text("Not charging.")
 
 			// you can go to sleep
-			DPMSSetTimeout(60)
+			DPMSForceOff()
 			time.Sleep(200 * time.Millisecond) // drag the chain, save some power
 		}
 	} else {
