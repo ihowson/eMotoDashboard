@@ -15,8 +15,10 @@ package sabvoton
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/ihowson/eMotoDashboard/model"
@@ -47,8 +49,22 @@ func (ss *SabvotonSerial) DumpAllValues() {
 	}
 }
 
+type datalog struct {
+	Now                       time.Time
+	SystemStatus              uint16
+	MotorSpeed                uint16
+	MotorAngle                uint16
+	HallStatus                uint16
+	MOSFETStatus              uint16
+	ControllerTemperature2562 uint16
+	ControllerTemperature2754 uint16
+}
+
 func (ss *SabvotonSerial) Run(ctx context.Context) error {
-	// TODO: honor ctx.Done()
+	dataLogFile, err := os.OpenFile("/tmp/svmc_datalog.jsonl", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return fmt.Errorf("failed to open datalog file: %w", err)
+	}
 
 	client, err := modbus.NewClient(&modbus.ClientConfiguration{
 		URL:      fmt.Sprintf("rtu://%s", ss.DevicePath),
@@ -86,13 +102,35 @@ func (ss *SabvotonSerial) Run(ctx context.Context) error {
 	// TODO: if we didn't get nil for the last error, keep trying to reconnect (and flag it as an error on the model)
 
 	for ctx.Err() == nil {
-		// No idea if this is correct. Never seen it vary from 30.
-		// controllerTemperature := ss.ReadFloat(RegisterControllerTemperature, math.NaN())
-		// model.LockNStore(m, &m.ControllerTemperatureCelcius, controllerTemperature)
+		systemStatus := ss.ReadUInt16(RegisterSystemStatus, 0)
+		ss.Model.Debugs.Store("SabvotonSystemStatus", systemStatus)
 
-		// This is the 23/13 code that changes when you go to flux weakening. You might want to display it as text on the dash especially if it's anomalous.
-		// systemStatus := ss.ReadUInt16(RegisterSystemStatus, 0)
-		// ss.Model.Debugs.Store("SabvotonSystemStatus", systemStatus)
+		if systemStatus == 0 {
+			// Controller reads are failing. Quit to reconnect.
+			return fmt.Errorf("Sabvoton is not responding")
+		}
+
+		motorSpeed := ss.ReadUInt16(RegisterMotorSpeed, 0)
+		ss.Model.Debugs.Store("RegisterMotorSpeed", motorSpeed)
+
+		// Collect and store datalogs
+		dl := datalog{
+			Now:          time.Now(),
+			SystemStatus: systemStatus,
+			MotorSpeed:   motorSpeed,
+			MotorAngle:   ss.ReadUInt16(RegisterMotorAngle, 0),
+			HallStatus:   ss.ReadUInt16(RegisterHallStatus, 0),
+			MOSFETStatus: ss.ReadUInt16(RegisterMOSFETStatus, 0),
+		}
+
+		dlJSON, err := json.Marshal(dl)
+		if err != nil {
+			log.Printf("failed to marshal datalog: %v", err)
+			continue
+		}
+
+		dataLogFile.Write(dlJSON)
+		dataLogFile.WriteString("\n")
 
 		// This is within 1V of the CAv3
 		// batteryVoltage := ss.ReadFloat(RegisterBatteryVoltage, math.NaN())

@@ -5,7 +5,10 @@ package cycleanalyst
 import (
 	"bufio"
 	"context"
+	"encoding/json"
 	"fmt"
+	"log"
+	"os"
 	"sync"
 	"time"
 
@@ -30,6 +33,11 @@ func (ca *CycleAnalyst3Serial) LastUpdate() time.Time {
 }
 
 func (ca *CycleAnalyst3Serial) Run(ctx context.Context) error {
+	dataLogFile, err := os.OpenFile("/tmp/cav3_datalog.jsonl", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return fmt.Errorf("failed to open datalog file: %w", err)
+	}
+
 	mode := &serial.Mode{
 		BaudRate: 9600,
 		Parity:   serial.NoParity,
@@ -51,6 +59,15 @@ func (ca *CycleAnalyst3Serial) Run(ctx context.Context) error {
 		ca.lock.Lock()
 		ca.lastUpdate = time.Now()
 		ca.lock.Unlock()
+
+		dlJSON, err := json.Marshal(dr)
+		if err != nil {
+			log.Printf("failed to marshal datalog: %v", err)
+			continue
+		}
+
+		dataLogFile.Write(dlJSON)
+		dataLogFile.WriteString("\n")
 	}
 	err = scanner.Err()
 	if err != nil {
