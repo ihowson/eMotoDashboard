@@ -7,7 +7,7 @@
             "label": "make run",
             "type": "shell",
             "command": "make run",
-            "problemMatcher": [],
+            "problemMatcher": ["$go"],
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -17,7 +17,7 @@
             "label": "make deploy",
             "type": "shell",
             "command": "make deploy",
-            "problemMatcher": [],
+            "problemMatcher": ["$go"],
             "group": {
                 "kind": "test",
                 "isDefault": true
@@ -27,7 +27,7 @@
             "label": "make clean",
             "type": "shell",
             "command": "make clean",
-            "problemMatcher": [],
+            "problemMatcher": ["$go"],
             "group": {
                 "kind": "build",
                 "isDefault": false
