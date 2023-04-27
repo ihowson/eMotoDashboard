@@ -58,13 +58,19 @@ func (gui *MotoGUI) drawRunning() {
 		X: 0.0,
 		Y: 0.0,
 	})
+
+	// Power output reported by BMS.
+	// Higher latency than the CAv3 but doesn't require a separate shunt.
+	bmsBasicInfo := b.BMS.LatestBasicInfo()
+	// TODO: If the basicInfo is out of date, we should show a warning.
+	// Negative because BMS reports net charge rate.
 	imgui.ProgressBarV(
-		float32(m.BatteryAmps/150.0),
+		-float32(bmsBasicInfo.PackAmps/150.0),
 		imgui.Vec2{
 			X: 800.0,
 			Y: 60.0,
 		},
-		fmt.Sprintf("%0.1fkW", m.BatteryVoltageCA*m.BatteryAmps/1000.0),
+		fmt.Sprintf("%0.1fkW", -bmsBasicInfo.PackAmps*bmsBasicInfo.PackVolts/1000.0),
 	)
 
 	// TODO: status icons would go here
