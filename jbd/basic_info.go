@@ -55,20 +55,18 @@ func (jbd *JBDBluetooth) LatestBasicInfo() BasicInfo {
 }
 
 func (jbd *JBDBluetooth) ReadBasicInfo(ctx context.Context) (BasicInfo, error) {
-	info := BasicInfo{
-		Time: time.Now(),
-	}
-
 	req := readRequest(RegisterBasicInfo, []byte{})
 	resp, err := jbd.RawRequest(ctx, req)
 	if err != nil {
-		return info, fmt.Errorf("RawRequest: %w", err)
+		return BasicInfo{}, fmt.Errorf("RawRequest: %w", err)
 	}
 
-	info, err = parseBasicInfoRaw(resp)
+	info, err := parseBasicInfoRaw(resp)
 	if err != nil {
 		return info, fmt.Errorf("parseBasicInfoRaw: %w", err)
 	}
+
+	info.Time = time.Now()
 
 	return info, nil
 }
