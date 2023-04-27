@@ -6,9 +6,11 @@ package jbd
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
+	"os"
 	"sync"
 	"time"
 
@@ -36,8 +38,13 @@ type JBDBluetooth struct {
 func (jbd *JBDBluetooth) Run(ctx context.Context) error {
 	jbd.rxPayloads = make(chan []byte)
 
+	dataLogFile, err := os.OpenFile("/tmp/bms_datalog.jsonl", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return fmt.Errorf("failed to open datalog file: %w", err)
+	}
+
 	var adapter = bluetooth.DefaultAdapter
-	err := adapter.Enable()
+	err = adapter.Enable()
 	if err != nil {
 		return fmt.Errorf("enable adapter: %w", err)
 	}
@@ -140,6 +147,17 @@ func (jbd *JBDBluetooth) Run(ctx context.Context) error {
 		jbd.latestBasicInfo = info
 		jbd.mutex.Unlock()
 
+		// Write to datalog.
+		dlJSON, err := json.Marshal(info)
+		if err != nil {
+			log.Printf("failed to marshal datalog: %v", err)
+			continue
+		}
+
+		dataLogFile.Write(dlJSON)
+		dataLogFile.WriteString("\n")
+
+		// TODO: if we're Running poll as fast as possible. In Charging, poll slowly.
 		time.Sleep(1 * time.Second)
 
 		cellVoltages, err := jbd.ReadCellVoltages(ctx)
