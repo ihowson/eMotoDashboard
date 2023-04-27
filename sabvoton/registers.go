@@ -16,6 +16,13 @@ const (
 	Double FloatPrecision = 6553.0
 )
 
+// TODO: can you use generics to tidy this up?
+
+type RegisterSInt16 struct {
+	Address uint16
+	Sample  int
+}
+
 type RegisterUInt16 struct {
 	Address uint16
 	Sample  int
@@ -38,8 +45,12 @@ var (
 	RegisterMaxPhaseCurrent       = RegisterUInt16{Address: 2553, Sample: 350}
 	RegisterProtectedPhaseCurrent = RegisterUInt16{Address: 2554, Sample: 450}
 	RegisterRatedPhaseCurrent     = RegisterUInt16{Address: 2559, Sample: 150}
+
+	// 2560 value: 30
+	// 2561 value: 4412 float
+
 	// On my controller, this always returns 32.97.
-	RegisterControllerTemperature2562      = RegisterFloat16{Address: 2562, Precision: Single, Sample: 32.97} // TODO: update with sample from your controller . There are two controller temperature -- which one is correct? . This doesn't seem to be the right one.
+	RegisterControllerTemperature2562      = RegisterFloat16{Address: 2562, Precision: Single, Sample: 32.97}
 	RegisterUnderworkTemperature           = RegisterUInt16{Address: 2568, Sample: 90}
 	RegisterReworkTemperature              = RegisterUInt16{Address: 2569, Sample: 80}
 	RegisterLimitedCurrentTemperature      = RegisterUInt16{Address: 2570, Sample: 70}
@@ -51,7 +62,7 @@ var (
 	RegisterReverseCurrentLimit            = RegisterUInt16{Address: 2596, Sample: 20}
 	RegisterFluxWeakeningEnabled           = RegisterUInt16{Address: 2597, Sample: 1}
 	RegisterFluxWeakenCurrent              = RegisterUInt16{Address: 2598, Sample: 50}
-	RegisterEbrakePhaseCurrent             = RegisterUInt16{Address: 2599, Sample: 32}
+	RegisterEbrakePhaseAmps                = RegisterUInt16{Address: 2599, Sample: 32}
 	RegisterSlideRechargeEnabled           = RegisterUInt16{Address: 2600, Sample: 0}
 	RegisterSlideRechargePhaseCurrent      = RegisterUInt16{Address: 2601, Sample: 30}
 	RegisterSlideRechargeSpeed             = RegisterUInt16{Address: 2602, Sample: 100}
@@ -73,9 +84,9 @@ var (
 	RegisterCurrentLoopKi           = RegisterUInt16{Address: 2649, Sample: 9}
 	RegisterHallAngleTestEnabled    = RegisterUInt16{Address: 2650, Sample: 0}
 
-	RegisterControlMode  = RegisterUInt16{Address: 2651, Sample: 0} // 0=Normal 1=HallAngleTest
-	RegisterTestCurrent  = RegisterUInt16{Address: 2652, Sample: 0}
-	RegisterHallAngle    = RegisterUInt16{Address: 2653, Sample: 243}
+	RegisterControlMode  = RegisterUInt16{Address: 2651, Sample: 0}   // 0=Normal 1=HallAngleTest
+	RegisterTestCurrent  = RegisterUInt16{Address: 2652, Sample: 0}   // You need about 60A to get the motor to move while the tyre is mounted.
+	RegisterHallAngle    = RegisterUInt16{Address: 2653, Sample: 243} // 240 deg for yours
 	RegisterSystemStatus = RegisterUInt16{Address: 2748, Sample: 23}
 
 	/*
@@ -97,20 +108,35 @@ var (
 
 	RegisterBatteryVoltage        = RegisterFloat16{Address: 2749, Precision: Single, Sample: 67.63736264}
 	RegisterWeakenCurrentCommand  = RegisterUInt16{Address: 2750, Sample: 0}
-	RegisterWeakenCurrentFeedback = RegisterUInt16{Address: 2751, Sample: 75}
+	RegisterWeakenCurrentFeedback = RegisterSInt16{Address: 2751, Sample: 75}
 	RegisterTorqueCurrentCommand  = RegisterUInt16{Address: 2752, Sample: 0}
-	RegisterTorqueCurrentFeedback = RegisterUInt16{Address: 2753, Sample: 65529}
-
+	RegisterTorqueCurrentFeedback = RegisterSInt16{Address: 2753, Sample: 65529}
 	// On my controller, this always returns 25. This is what the MQCON Windows software reports.
 	RegisterControllerTemperature2754 = RegisterUInt16{Address: 2754, Sample: 25}
-	RegisterMotorTemperature          = RegisterUInt16{Address: 2755, Sample: 130}
-	RegisterMotorAngle                = RegisterUInt16{Address: 2756, Sample: 22118}
-	RegisterMotorSpeed                = RegisterUInt16{Address: 2757, Sample: 0}
-	RegisterHallStatus                = RegisterUInt16{Address: 2758, Sample: 2}
+	// My controller does not have temperature sensing, so I have not tested this. Always reports 130.
+	RegisterMotorTemperature = RegisterUInt16{Address: 2755, Sample: 130}
+	RegisterMotorAngle       = RegisterFloat16{Address: 2756, Precision: Single, Sample: 22118.0}
+	RegisterMotorSpeed       = RegisterSInt16{Address: 2757, Sample: 65532}
+	RegisterHallStatus       = RegisterUInt16{Address: 2758, Sample: 2}
+	RegisterThrottleVoltage  = RegisterFloat16{Address: 2759, Precision: Double, Sample: 0.128}
+	RegisterMOSFETStatus     = RegisterUInt16{Address: 2760, Sample: 426}
+	/*
+	   2761 value: 62970
+	   2762 value: 0 ERROR CODE? 14
+	   2763 value: 0 always 15
+	   2764 value: 0 always 16
+	   2765 value: 0 always 17
+	   2766 value: 0 always 18
+	   2767 value: 65144 always 19
+	   2768 value: 54452 always 20
+	   2769 value: 50202 normal, 50234 in fault (-32, 1<<5: motorovertemp?) or is this better interpreted as a float? 21
+	   2770 value: 52916 always 22
+	   2771 value: 50937 always
+	   2772 value: 47101 always
+	   2773 value: 0 always
+	*/
 
-	RegisterThrottleVoltage = RegisterFloat16{Address: 2759, Precision: Double, Sample: 0.128}
-	RegisterMOSFETStatus    = RegisterUInt16{Address: 2760, Sample: 426}
-	RegisterInitial         = RegisterUInt16{Address: 4039, Sample: 13345}
+	RegisterInitial = RegisterUInt16{Address: 4039, Sample: 13345}
 
 /* errors (where do we read this?)
 1 MOSFETFault
@@ -154,8 +180,6 @@ var (
 2556 value: 30 limit DC current?
 2557 value: 150 ?? this is 100 on the spreadsheet; nominal battery current limit?
 2558 value: 3000
-2560 value: 30
-2561 value: 4412 float
 2588 value: 1
 2589 value: 0
 2590 value: 1
@@ -163,11 +187,15 @@ var (
 2592 value: 1
 2593 value: 0
 2594 value: 0
+
 2603 value: 1
+
 2614 value: 0
+
 2628 value: 0
 2629 value: 0
 2630 value: 1
+
 2632 value: 3072
 2633 value: 102
 
@@ -184,19 +212,6 @@ var (
 2661 value: 0
 2662 value: 0
 
-2761 value: 62970
-2762 value: 0
-2763 value: 0
-2764 value: 0
-2765 value: 0
-2766 value: 0
-2767 value: 65144
-2768 value: 54452
-2769 value: 50202
-2770 value: 52916
-2771 value: 50937
-2772 value: 47101
-2773 value: 0
 2788 value: 0
 2789 value: 14496
 2790 value: 19560
@@ -209,6 +224,7 @@ var (
 2797 value: 0
 2798 value: 0
 2799 value: 0
+
 2808 value: 0
 2809 value: 53482
 2810 value: 2000
@@ -219,6 +235,7 @@ var (
 2815 value: 3015
 2816 value: 2736
 2817 value: 54120
+
 2848 value: 80
 2849 value: 80
 2850 value: 30
@@ -230,6 +247,7 @@ var (
 2856 value: 0
 2857 value: 0
 2858 value: 100
+
 2868 value: 86
 2869 value: 80
 2870 value: 130
@@ -246,6 +264,7 @@ var (
 2881 value: 65
 2882 value: 1
 2883 value: 40
+
 4038 value: 44039
 
 4048 value: 0

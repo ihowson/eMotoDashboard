@@ -40,11 +40,9 @@ const SabvotonInitCode = uint16(13345)
 // log. It's intended for debugging.
 func (ss *SabvotonSerial) DumpAllValues() {
 	for address := uint16(0); address < 4096; address++ {
-		// for address := uint16(2548); address < 4096; address++ {
 		var value uint16
 		value, err := ss.modbus.ReadRegister(address, modbus.HOLDING_REGISTER)
 		if err != nil {
-			// log.Printf("address %d failed: %v", address, err)
 			continue
 		}
 
@@ -53,14 +51,8 @@ func (ss *SabvotonSerial) DumpAllValues() {
 }
 
 type datalog struct {
-	Now                       time.Time
-	SystemStatus              uint16
-	MotorSpeed                uint16
-	MotorAngle                uint16
-	HallStatus                uint16
-	MOSFETStatus              uint16
-	ControllerTemperature2562 uint16
-	ControllerTemperature2754 uint16
+	Time         time.Time
+	SystemStatus uint16
 }
 
 func (ss *SabvotonSerial) Run(ctx context.Context) error {
@@ -102,12 +94,15 @@ func (ss *SabvotonSerial) Run(ctx context.Context) error {
 
 	ss.modbus = client
 
-	// TODO: if we didn't get nil for the last error, keep trying to reconnect (and flag it as an error on the model)
-
 	// Dump and update the controller configuration.
 	log.Printf("SABVOTON CONFIG")
 	for _, conf := range DesiredConfig {
-		val := ss.ReadUInt16(conf.Register, 0)
+		val, err := ss.ReadUInt16(conf.Register)
+		if err != nil {
+			log.Printf("could not read initial %s: %v", conf.Name, err)
+			continue
+		}
+
 		log.Printf("%s: %d", conf.Name, val)
 
 		if conf.Value != val {
@@ -120,25 +115,22 @@ func (ss *SabvotonSerial) Run(ctx context.Context) error {
 	}
 
 	for ctx.Err() == nil {
-		systemStatus := ss.ReadUInt16(RegisterSystemStatus, 0)
+		systemStatus, err := ss.ReadUInt16(RegisterSystemStatus)
+		if err != nil {
+			return fmt.Errorf("couldn't read SystemStatus")
+		}
 		ss.Model.Debugs.Store("SabvotonSystemStatus", systemStatus)
 
 		if systemStatus == 0 {
 			// Controller reads are failing. Quit to reconnect.
-			return fmt.Errorf("Sabvoton is not responding")
-		}
+			return fmt.Errorf("SystemStatus is 0")
 
-		motorSpeed := ss.ReadUInt16(RegisterMotorSpeed, 0)
-		ss.Model.Debugs.Store("RegisterMotorSpeed", motorSpeed)
+		}
 
 		// Collect and store datalogs
 		dl := datalog{
-			Now:          time.Now(),
+			Time: time.Now(),
 			SystemStatus: systemStatus,
-			MotorSpeed:   motorSpeed,
-			MotorAngle:   ss.ReadUInt16(RegisterMotorAngle, 0),
-			HallStatus:   ss.ReadUInt16(RegisterHallStatus, 0),
-			MOSFETStatus: ss.ReadUInt16(RegisterMOSFETStatus, 0),
 		}
 
 		dlJSON, err := json.Marshal(dl)
@@ -149,31 +141,31 @@ func (ss *SabvotonSerial) Run(ctx context.Context) error {
 
 		dataLogFile.Write(dlJSON)
 		dataLogFile.WriteString("\n")
-
-		// This is within 1V of the CAv3
-		// batteryVoltage := ss.ReadFloat(RegisterBatteryVoltage, math.NaN())
-		// ss.Model.Debugs.Store("SabvotonBatteryVoltage", batteryVoltage)
-
-		// log.Printf("controllerTemperature=%v systemStatus=%v motorSpeed=%v mosfetStatus=%v batteryVoltage=%v", controllerTemperature, systemStatus, motorSpeed, mosfetStatus, batteryVoltage)
 	}
 
 	return ctx.Err()
 }
 
-func (ss *SabvotonSerial) ReadFloat(reg RegisterFloat16, errValue float64) float64 {
+func (ss *SabvotonSerial) ReadFloat(reg RegisterFloat16) (float64, error) {
 	raw, err := ss.modbus.ReadRegister(reg.Address, modbus.HOLDING_REGISTER)
 	if err != nil {
-		log.Printf("ReadRegister(Address=%d): %v", reg.Address, err)
-		return errValue
+		return 0.0, fmt.Errorf("ReadRegister(Address=%d): %v", reg.Address, err)
 	}
-	return float64(raw) / float64(reg.Precision)
+	return float64(raw) / float64(reg.Precision), nil
 }
 
-func (ss *SabvotonSerial) ReadUInt16(reg RegisterUInt16, errValue uint16) uint16 {
-	raw, err := ss.modbus.ReadRegister(reg.Address, modbus.HOLDING_REGISTER)
+func (ss *SabvotonSerial) ReadUInt16(reg RegisterUInt16) (uint16, error) {
+	return ss.modbus.ReadRegister(reg.Address, modbus.HOLDING_REGISTER)
+}
+
+func (ss *SabvotonSerial) ReadSInt16(reg RegisterSInt16) (int16, error) {
+	val, err := ss.modbus.ReadRegister(reg.Address, modbus.HOLDING_REGISTER)
 	if err != nil {
-		log.Printf("ReadRegister(Address=%d): %v", reg.Address, err)
-		return errValue
+		return 0, fmt.Errorf("ReadSInt16 ReadRegister(Address=%d): %v", reg.Address, err)
 	}
-	return raw
+	return int16(val), nil
+}
+
+func (ss *SabvotonSerial) ReadUInt16Array(reg RegisterUInt16, length uint) ([]uint16, error) {
+	return ss.modbus.ReadRegisters(reg.Address, uint16(length), modbus.HOLDING_REGISTER)
 }
